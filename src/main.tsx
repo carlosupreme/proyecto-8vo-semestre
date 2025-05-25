@@ -7,13 +7,16 @@ import ReactDOM from 'react-dom/client'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen'
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import reportWebVitals from './reportWebVitals.ts'
 import './styles.css'
+
+const queryClient = new QueryClient()
 
 // Create a new router instance
 const router = createRouter({
   routeTree,
-  context: {},
+  context: { queryClient },
   defaultPreload: 'intent',
   scrollRestoration: true,
   defaultStructuralSharing: true,
@@ -39,13 +42,15 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <ClerkProvider
-        localization={esMX}
-        publishableKey={PUBLISHABLE_KEY}
-        afterSignOutUrl="/"
-      >
-        <RouterProvider router={router} />
-      </ClerkProvider>
+      <QueryClientProvider client={queryClient}>
+        <ClerkProvider
+          localization={esMX}
+          publishableKey={PUBLISHABLE_KEY}
+          afterSignOutUrl="/"
+        >
+          <RouterProvider router={router} />
+        </ClerkProvider>
+      </QueryClientProvider>
     </StrictMode>,
   )
 }

@@ -1,72 +1,86 @@
-import { Outlet, createRootRoute, redirect } from '@tanstack/react-router'
+import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { Layout } from '../components/layout'
 import { useAuth } from '@clerk/clerk-react'
+import { QueryClient } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
-// Define public routes that don't require authentication
 const publicRoutes = ['/sign-in', '/sign-up']
 
-// Helper function to check if a route is public
 const isPublicRoute = (pathname: string) => {
   return publicRoutes.some(route => pathname === route)
 }
 
-export const Route = createRootRoute({
-  component: () => {
-    const { isSignedIn, isLoaded } = useAuth()
-    
-    // Get the current pathname
-    const pathname = window.location.pathname
-    const currentRouteIsPublic = isPublicRoute(pathname)
-    
-    // If Clerk is still loading, show a loading state
-    if (!isLoaded) {
-      return (
-        <div className="flex h-screen items-center justify-center">
-          <div className="text-center">
-            <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent mx-auto"></div>
-            <p>Loading...</p>
-          </div>
+const RouteComponent = () => {
+  const { isSignedIn, isLoaded } = useAuth()
+
+  // Get the current pathname
+  const pathname = window.location.pathname
+  const currentRouteIsPublic = isPublicRoute(pathname)
+
+  // If Clerk is still loading, show a loading state
+  if (!isLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-t-transparent mx-auto"></div>
+          <p>Loading...</p>
         </div>
-      )
-    }
-    
-    // If user is not signed in and trying to access a protected route, redirect to sign-in
-    if (!isSignedIn && !currentRouteIsPublic) {
-      window.location.href = '/sign-in'
-      return (
-        <div className="flex h-screen items-center justify-center">
-          <p>Redirecting to sign in...</p>
-        </div>
-      )
-    }
-    
-    // If user is signed in and trying to access a public route, redirect to home
-    if (isSignedIn && currentRouteIsPublic) {
-      window.location.href = '/'
-      return (
-        <div className="flex h-screen items-center justify-center">
-          <p>Redirecting to home...</p>
-        </div>
-      )
-    }
-    
-    // For public routes (sign-in, sign-up), render without the NavBar
-    // This should never execute due to the redirects above, but keeping as a safeguard
-    if (currentRouteIsPublic) {
-      return (
-        <>
-          <Outlet />
-        </>
-      )
-    }
-    
-    // For authenticated routes, render with the NavBar
+      </div>
+    )
+  }
+
+  // If user is not signed in and trying to access a protected route, redirect to sign-in
+  if (!isSignedIn && !currentRouteIsPublic) {
+    window.location.href = '/sign-in'
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p>Redirecting to sign in...</p>
+      </div>
+    )
+  }
+
+  // If user is signed in and trying to access a public route, redirect to home
+  if (isSignedIn && currentRouteIsPublic) {
+    window.location.href = '/'
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p>Redirecting to home...</p>
+      </div>
+    )
+  }
+
+  // For public routes (sign-in, sign-up), render without the NavBar
+  // This should never execute due to the redirects above, but keeping as a safeguard
+  if (currentRouteIsPublic) {
     return (
       <>
-        <Layout>
-          <Outlet />
-        </Layout>
+        <Outlet />
       </>
     )
-  },
-})
+  }
+
+  // For authenticated routes, render with the NavBar
+  return (
+    <>
+      <Layout>
+        <Outlet />
+      </Layout>
+      <ReactQueryDevtools buttonPosition="top-right" />
+
+    </>
+  )
+}
+
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+  {
+    component: RouteComponent,
+    notFoundComponent: () => {
+      return (
+        <div>
+          <p>Lo siento, la página que buscas no existe</p>
+          <Link to="/">Ir a inicio</Link>
+        </div>
+      )
+    },
+  }
+)
