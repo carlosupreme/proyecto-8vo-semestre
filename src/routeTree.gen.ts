@@ -11,6 +11,8 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SignUpImport } from './routes/sign-up'
+import { Route as SignInImport } from './routes/sign-in'
 import { Route as CuentaImport } from './routes/cuenta'
 import { Route as ChatsImport } from './routes/chats'
 import { Route as AjustesImport } from './routes/ajustes'
@@ -18,6 +20,18 @@ import { Route as AgendaImport } from './routes/agenda'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
+
+const SignUpRoute = SignUpImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SignInRoute = SignInImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const CuentaRoute = CuentaImport.update({
   id: '/cuenta',
@@ -88,6 +102,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CuentaImport
       parentRoute: typeof rootRoute
     }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInImport
+      parentRoute: typeof rootRoute
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -99,6 +127,8 @@ export interface FileRoutesByFullPath {
   '/ajustes': typeof AjustesRoute
   '/chats': typeof ChatsRoute
   '/cuenta': typeof CuentaRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
 }
 
 export interface FileRoutesByTo {
@@ -107,6 +137,8 @@ export interface FileRoutesByTo {
   '/ajustes': typeof AjustesRoute
   '/chats': typeof ChatsRoute
   '/cuenta': typeof CuentaRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
 }
 
 export interface FileRoutesById {
@@ -116,14 +148,38 @@ export interface FileRoutesById {
   '/ajustes': typeof AjustesRoute
   '/chats': typeof ChatsRoute
   '/cuenta': typeof CuentaRoute
+  '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agenda' | '/ajustes' | '/chats' | '/cuenta'
+  fullPaths:
+    | '/'
+    | '/agenda'
+    | '/ajustes'
+    | '/chats'
+    | '/cuenta'
+    | '/sign-in'
+    | '/sign-up'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agenda' | '/ajustes' | '/chats' | '/cuenta'
-  id: '__root__' | '/' | '/agenda' | '/ajustes' | '/chats' | '/cuenta'
+  to:
+    | '/'
+    | '/agenda'
+    | '/ajustes'
+    | '/chats'
+    | '/cuenta'
+    | '/sign-in'
+    | '/sign-up'
+  id:
+    | '__root__'
+    | '/'
+    | '/agenda'
+    | '/ajustes'
+    | '/chats'
+    | '/cuenta'
+    | '/sign-in'
+    | '/sign-up'
   fileRoutesById: FileRoutesById
 }
 
@@ -133,6 +189,8 @@ export interface RootRouteChildren {
   AjustesRoute: typeof AjustesRoute
   ChatsRoute: typeof ChatsRoute
   CuentaRoute: typeof CuentaRoute
+  SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -141,6 +199,8 @@ const rootRouteChildren: RootRouteChildren = {
   AjustesRoute: AjustesRoute,
   ChatsRoute: ChatsRoute,
   CuentaRoute: CuentaRoute,
+  SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
 }
 
 export const routeTree = rootRoute
@@ -157,7 +217,9 @@ export const routeTree = rootRoute
         "/agenda",
         "/ajustes",
         "/chats",
-        "/cuenta"
+        "/cuenta",
+        "/sign-in",
+        "/sign-up"
       ]
     },
     "/": {
@@ -174,6 +236,12 @@ export const routeTree = rootRoute
     },
     "/cuenta": {
       "filePath": "cuenta.tsx"
+    },
+    "/sign-in": {
+      "filePath": "sign-in.tsx"
+    },
+    "/sign-up": {
+      "filePath": "sign-up.tsx"
     }
   }
 }
