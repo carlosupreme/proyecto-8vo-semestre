@@ -23,8 +23,6 @@ export type WaapiClientStatus = {
     | "disconnected",
 }
 
-
-
 export type WaapiClientInfo = {
     status: "success" | "error",
     instanceId: string,
@@ -34,7 +32,6 @@ export type WaapiClientInfo = {
         formattedNumber: string,
         profilePicUrl: string
     }
-
 }
 
 export type WaapiQrCode = {
@@ -52,7 +49,7 @@ export const waapiService = {
         return response.data.clientStatus;
     },
     clientInfo: async (instanceId: string): Promise<WaapiClientInfo> => {
-        const response = await waapi.get<{ me: WaapiClientInfo }>(`/${instanceId}`)
+        const response = await waapi.get<{ me: WaapiClientInfo }>(`/${instanceId}/client/me`)
         return response.data.me
     },
     logout: async (instanceId: string): Promise<boolean> => {

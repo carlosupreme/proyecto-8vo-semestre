@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { MoreVertical, Plus, Search } from "lucide-react";
+import { Loader2, MoreVertical, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useGetUser } from "../../../account/hooks/useGetUser";
 import { useMutateUser } from "../../../account/hooks/useMutateUser";
@@ -26,7 +26,7 @@ export function ChatListHeader({
   const { data: user } = useGetUser();
   const { mutateAsync: updateUser } = useMutateUser();
   const isAIEnabled = useMemo(() => user?.assistantConfig.enabled, [user]);
-  const { isConnected: isWhatsAppConnected } = useWhatsApp();
+  const { isConnected: isWhatsAppConnected, isLoading: isWhatsAppLoading } = useWhatsApp();
   const [isViewWhatsApp, setIsViewWhatsApp] = useState(false);
   const [isConnectWhatsApp, setIsConnectWhatsApp] = useState(false);
 
@@ -58,9 +58,16 @@ export function ChatListHeader({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem  >
-                {isWhatsAppConnected
-                  ? <Button variant="outline" onClick={() => setIsViewWhatsApp(true)}>Ver WhatsApp</Button>
-                  : <Button variant="outline" onClick={() => setIsConnectWhatsApp(true)}>Conectar WhatsApp</Button>}
+                {
+                  isWhatsAppLoading ?
+                    <Button variant="outline" disabled>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Conectando...
+                    </Button>
+                    :
+                    isWhatsAppConnected
+                      ? <Button variant="outline" onClick={() => setIsViewWhatsApp(true)}>Ver WhatsApp</Button>
+                      : <Button variant="outline" onClick={() => setIsConnectWhatsApp(true)}>Conectar WhatsApp</Button>}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onAIToggle}>
                 {isAIEnabled ? "Apagar" : "Encender"} IA

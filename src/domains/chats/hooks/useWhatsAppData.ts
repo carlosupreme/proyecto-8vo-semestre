@@ -17,8 +17,13 @@ export function useWhatsAppData() {
             if (!user) throw Error("User not found");
 
             const data = await waapiService.clientStatus(user.instanceId);
-            const qr = await waapiService.qr(user.instanceId);
-            return { ...data, qr: qr.data.qr_code }
+
+            if (data.instanceStatus === "qr") {
+                const qr = await waapiService.qr(user.instanceId);
+                return { ...data, qr: qr.data.qr_code }
+            }
+
+            return { ...data, qr: "" }
         },
         staleTime: Infinity,
         enabled: !!user

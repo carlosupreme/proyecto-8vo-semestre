@@ -35,3 +35,11 @@ socket.on('qrStatus', (data) => {
         return { ...whatsAppData, qr: data }
     })
 })
+
+socket.on('ready', () => {
+    toast.success('WhatsApp listo para recibir mensajes')
+    queryClient.invalidateQueries(  {
+        queryKey: WHATSAPP_QUERY_KEY,
+    })
+})
+    
