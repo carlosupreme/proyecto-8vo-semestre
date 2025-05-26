@@ -15,37 +15,37 @@ const NavBar = () => {
     return (
         <div
             className={cn(
-                "fixed left-1/2 transform -translate-x-1/2 bg-primary shadow-lg z-50 transition-all duration-300 ease-in-out max-w-md w-11/12",
+                "fixed left-1/2 transform -translate-x-1/2 bg-primary shadow-lg z-50 max-w-fit transition-all duration-300 ease-in-out",
                 isCollapsed
                     ? "bottom-0 rounded-t-lg py-1 px-2 h-6"
-                    : "bottom-4 rounded-3xl px-4 py-2"
+                    : "bottom-4 rounded-3xl px-8 py-2"
             )}
         >
             {isCollapsed ? (
-                <div className="flex justify-center items-center h-full opacity-50">
+                <div className="flex justify-center items-center h-full opacity-50 max-w-fit">
                     <Button
                         variant="default"
                         size="sm"
                         onClick={toggleCollapse}
-                        className="p-0 h-6 w-full text-background"
+                        className="p-0 h-6 w-full text-background  cursor-pointer"
                     >
                         <ChevronUp className="h-6 w-6" />
                     </Button>
                 </div>
             ) : (
                 <div className="relative">
-                    <div className="flex justify-end mb-1 absolute top-1 opacity-50 -right-2">
+                    <div className="flex justify-end mb-1 absolute top-1 opacity-50 -right-8">
                         <Button
-                            variant="default"
+                            variant="link"
                             size="sm"
                             onClick={toggleCollapse}
-                            className="p-0 h-6 text-background"
+                            className="p-0 h-6 text-background  cursor-pointer"
                         >
                             <ChevronDown className="h-6 w-6" />
                         </Button>
                     </div>
                     <nav className="mr-2">
-                        <ul className="flex justify-around items-center w-full">
+                        <ul className="flex justify-around gap-6 items-center w-full">
                             {navItems.map((item) => (
                                 <NavItem key={item.to} item={item} />
                             ))}

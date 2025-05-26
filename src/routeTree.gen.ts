@@ -14,10 +14,11 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as SignUpImport } from './routes/sign-up'
 import { Route as SignInImport } from './routes/sign-in'
 import { Route as CuentaImport } from './routes/cuenta'
-import { Route as ChatsImport } from './routes/chats'
 import { Route as AjustesImport } from './routes/ajustes'
 import { Route as AgendaImport } from './routes/agenda'
 import { Route as IndexImport } from './routes/index'
+import { Route as ChatsIndexImport } from './routes/chats/index'
+import { Route as ChatsChatIdImport } from './routes/chats/$chatId'
 
 // Create/Update Routes
 
@@ -39,12 +40,6 @@ const CuentaRoute = CuentaImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const ChatsRoute = ChatsImport.update({
-  id: '/chats',
-  path: '/chats',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const AjustesRoute = AjustesImport.update({
   id: '/ajustes',
   path: '/ajustes',
@@ -60,6 +55,18 @@ const AgendaRoute = AgendaImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ChatsIndexRoute = ChatsIndexImport.update({
+  id: '/chats/',
+  path: '/chats/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ChatsChatIdRoute = ChatsChatIdImport.update({
+  id: '/chats/$chatId',
+  path: '/chats/$chatId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -88,13 +95,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AjustesImport
       parentRoute: typeof rootRoute
     }
-    '/chats': {
-      id: '/chats'
-      path: '/chats'
-      fullPath: '/chats'
-      preLoaderRoute: typeof ChatsImport
-      parentRoute: typeof rootRoute
-    }
     '/cuenta': {
       id: '/cuenta'
       path: '/cuenta'
@@ -116,6 +116,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignUpImport
       parentRoute: typeof rootRoute
     }
+    '/chats/$chatId': {
+      id: '/chats/$chatId'
+      path: '/chats/$chatId'
+      fullPath: '/chats/$chatId'
+      preLoaderRoute: typeof ChatsChatIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/chats/': {
+      id: '/chats/'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof ChatsIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -125,20 +139,22 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/ajustes': typeof AjustesRoute
-  '/chats': typeof ChatsRoute
   '/cuenta': typeof CuentaRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/chats/$chatId': typeof ChatsChatIdRoute
+  '/chats': typeof ChatsIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/ajustes': typeof AjustesRoute
-  '/chats': typeof ChatsRoute
   '/cuenta': typeof CuentaRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/chats/$chatId': typeof ChatsChatIdRoute
+  '/chats': typeof ChatsIndexRoute
 }
 
 export interface FileRoutesById {
@@ -146,10 +162,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/ajustes': typeof AjustesRoute
-  '/chats': typeof ChatsRoute
   '/cuenta': typeof CuentaRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
+  '/chats/$chatId': typeof ChatsChatIdRoute
+  '/chats/': typeof ChatsIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -158,28 +175,31 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/ajustes'
-    | '/chats'
     | '/cuenta'
     | '/sign-in'
     | '/sign-up'
+    | '/chats/$chatId'
+    | '/chats'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/agenda'
     | '/ajustes'
-    | '/chats'
     | '/cuenta'
     | '/sign-in'
     | '/sign-up'
+    | '/chats/$chatId'
+    | '/chats'
   id:
     | '__root__'
     | '/'
     | '/agenda'
     | '/ajustes'
-    | '/chats'
     | '/cuenta'
     | '/sign-in'
     | '/sign-up'
+    | '/chats/$chatId'
+    | '/chats/'
   fileRoutesById: FileRoutesById
 }
 
@@ -187,20 +207,22 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
   AjustesRoute: typeof AjustesRoute
-  ChatsRoute: typeof ChatsRoute
   CuentaRoute: typeof CuentaRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
+  ChatsChatIdRoute: typeof ChatsChatIdRoute
+  ChatsIndexRoute: typeof ChatsIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
   AjustesRoute: AjustesRoute,
-  ChatsRoute: ChatsRoute,
   CuentaRoute: CuentaRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
+  ChatsChatIdRoute: ChatsChatIdRoute,
+  ChatsIndexRoute: ChatsIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -216,10 +238,11 @@ export const routeTree = rootRoute
         "/",
         "/agenda",
         "/ajustes",
-        "/chats",
         "/cuenta",
         "/sign-in",
-        "/sign-up"
+        "/sign-up",
+        "/chats/$chatId",
+        "/chats/"
       ]
     },
     "/": {
@@ -231,9 +254,6 @@ export const routeTree = rootRoute
     "/ajustes": {
       "filePath": "ajustes.tsx"
     },
-    "/chats": {
-      "filePath": "chats.tsx"
-    },
     "/cuenta": {
       "filePath": "cuenta.tsx"
     },
@@ -242,6 +262,12 @@ export const routeTree = rootRoute
     },
     "/sign-up": {
       "filePath": "sign-up.tsx"
+    },
+    "/chats/$chatId": {
+      "filePath": "chats/$chatId.tsx"
+    },
+    "/chats/": {
+      "filePath": "chats/index.tsx"
     }
   }
 }

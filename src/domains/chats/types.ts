@@ -1,4 +1,4 @@
-import type { Client } from "../clients/types"
+import type {Client} from "../clients/types"
 
 export type Media = {
     url: string
@@ -14,6 +14,10 @@ export type Message = {
     role: Role
     timestamp: number
     media?: Media
+    editedAt?: number
+    status?: string
+    reactions?: { [emoji: string]: string[] }
+    replyTo?: string
 }
 
 export type Role = 'user' | 'assistant' | 'business';
@@ -22,7 +26,7 @@ export type GetAllConversationsResponse = {
     conversations: {
         id: string,
         client: Client | undefined,
-        lastMessage: Message | null,
+        lastMessage: Message,
         newClientMessagesCount: number,
     }[],
     meta: {
@@ -48,7 +52,6 @@ export type Conversation = {
     newClientMessagesCount: number;
 }
 
-export type GetConversationByIdResponse = {
-    conversation: Conversation
+export type GetConversationByIdResponse = Conversation & {
     client: Client | undefined
 }

@@ -29,7 +29,7 @@ export function ConnectWhatsApp({
 }) {
     const { data, isLoading, error, refetch } = useWhatsAppData();
     const [timeLeft, setTimeLeft] = useState(120); // 2 minutos
-    const [isConnected, setIsConnected] = useState(false);
+    const [isConnected] = useState(false);
 
     // Simulador de countdown para expiración del QR
     useEffect(() => {
@@ -56,7 +56,7 @@ export function ConnectWhatsApp({
 
     const handleRefresh = () => {
         setTimeLeft(120);
-        refetch?.();
+        void refetch?.();
     };
 
     // Estados de la interfaz

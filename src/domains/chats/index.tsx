@@ -1,146 +1,144 @@
-import { useIsMobile } from "@/hooks/useMobile";
-import { cn } from "@/lib/utils";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ChatList, ChatListHeader } from "./components/chat-list";
-import { ConversationHeader, EmptyState, MessageInput, MessageList } from "./components/conversation";
-import { useChats, useSendMessage } from "./hooks/useChatData";
-import type { GetAllConversationsResponse, GetConversationByIdResponse } from "./types";
-import { AnimatePresence, motion } from "framer-motion";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import {useNavigate} from "@tanstack/react-router";
+import {useIsMobile} from "@/hooks/useMobile";
+import {cn} from "@/lib/utils";
+import {AnimatePresence, motion} from "framer-motion";
+import {useChatById, useChats, useSendMessage} from "@/domains/chats/hooks/useChatData.ts";
+import {ChatListHeader} from "@/domains/chats/components/chat-list/ChatListHeader.tsx";
+import {ChatList} from "@/domains/chats/components/chat-list/ChatList.tsx";
+import {ConversationHeader} from "@/domains/chats/components/conversation/ConversationHeader.tsx";
+import {MessageList} from "@/domains/chats/components/conversation/MessageList.tsx";
+import {MessageInput} from "@/domains/chats/components/conversation/MessageInput.tsx";
+import {EmptyState} from "@/domains/chats/components/conversation/EmptyState.tsx";
 
-export default function Chats() {
-    const isMobile = useIsMobile(1200);
-    const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [newMessage, setNewMessage] = useState('');
+interface ChatLayoutProps {
+    chatId?: string;
+    showChatList?: boolean;
+}
+
+export function ChatLayout({ chatId, showChatList = true }: ChatLayoutProps) {
+    const navigate = useNavigate();
+    const isMobile = useIsMobile(768);
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [newMessage, setNewMessage] = useState("");
     const messageEndRef = useRef<HTMLDivElement>(null);
 
-    const { data: chats } = useChats();
-    const { mutate: sendMessage } = useSendMessage();
+    const {data: chats} = useChats();
+    const {data: selectedChat, isLoading: isChatLoading} = useChatById(chatId);
+    const {mutate: sendMessage} = useSendMessage();
 
+    // Filtrar chats
     const filteredChats = useMemo(() => {
-        if (!chats) return [];
+        if (!chats?.conversations) return [];
+        return chats.conversations.filter(chat =>
+            chat.client?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [chats, searchTerm]);
 
-        return chats.conversations.filter(chat => chat.client?.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    const handleChatSelect = (selectedChatId: string) => {
+        void navigate({to: `/chats/${selectedChatId}`});
+    };
 
-    }, [chats, searchTerm]) as GetAllConversationsResponse['conversations'];
+    // Volver a la lista (móvil)
+    const handleBackToList = () => {
+        void navigate({to: "/chats"});
+    };
 
-    const selectedChat = useMemo(() => {
-        return chats?.conversations.find(chat => chat.id === selectedChatId);
-    }, [chats, selectedChatId]) as GetConversationByIdResponse | undefined;
-
+    // Enviar mensaje
     const handleSendMessage = () => {
-        if (newMessage.trim() === '' || !selectedChatId) return;
+        if (newMessage.trim() === "" || !chatId) return;
 
         sendMessage(
-            { chatId: selectedChatId, message: newMessage.trim() },
+            {chatId, message: newMessage.trim()},
             {
                 onSettled: () => {
-                    setNewMessage('');
+                    setNewMessage("");
                 }
             }
         );
     };
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
+    const handleKeyPress = (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
             handleSendMessage();
         }
     };
 
+    // Scroll al final cuando cambia el chat
     useEffect(() => {
-        setNewMessage('');
-        // Scroll to bottom when chat changes
+        setNewMessage("");
         setTimeout(() => {
-            messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            messageEndRef.current?.scrollIntoView({behavior: "smooth"});
         }, 100);
-    }, [selectedChatId]);
+    }, [chatId]);
 
-    const handleBackToList = () => {
-        setSelectedChatId(null);
-    };
-
-    const handleSearch = (term: string) => {
-        setSearchTerm(term);
-    };
-
-    const handleChatSelect = (chatId: string) => {
-        setSelectedChatId(chatId);
-    };
-
-    const handleMessageChange = (value: string) => {
-        setNewMessage(value);
-    };
+    // Lógica para mostrar/ocultar elementos
+    const shouldShowChatList = showChatList && (!isMobile || !chatId);
 
     return (
-        <div className="w-full h-full flex flex-col bg-background">
-            <div className="w-full flex-1 flex overflow-hidden">
-                {/* Chat List - Hidden on mobile when a chat is selected */}
-                <AnimatePresence>
-                    {(!isMobile || !selectedChatId) && (
-                        <motion.div 
-                            initial={isMobile ? { x: -300, opacity: 0 } : false}
-                            animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: -300, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className={cn(
-                                "flex flex-col h-full bg-card border-r shadow-sm",
-                                isMobile ? "w-full absolute z-10" : "w-80 min-w-80"
-                            )}
-                        >
-                            <ChatListHeader
-                                searchTerm={searchTerm}
-                                onSearch={handleSearch}
-                            />
-                            <div className="flex-1 overflow-hidden">
-                                <ChatList
-                                    chats={filteredChats}
-                                    selectedChatId={selectedChatId}
-                                    onChatSelect={handleChatSelect}
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+        <div className="h-screen flex bg-background">
+            {/* Lista de Chats */}
+            <AnimatePresence mode="wait">
+                {shouldShowChatList && (
+                    <motion.div
+                        initial={isMobile ? {x: -100, opacity: 0} : false}
+                        animate={{x: 0, opacity: 1}}
+                        exit={isMobile ? {x: -100, opacity: 0} : {}}
+                        className={cn(
+                            "flex flex-col bg-card border-r",
+                            isMobile ? "w-full absolute inset-0 z-20" : "w-1/3 max-w-md"
+                        )}
+                    >
+                        <ChatListHeader
+                            searchTerm={searchTerm}
+                            onSearch={setSearchTerm}
+                        />
+                        <ChatList
+                            chats={filteredChats}
+                            selectedChatId={chatId || null}
+                            onChatSelect={handleChatSelect}
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-                {/* Conversation Area - Full width on mobile when a chat is selected */}
-                <div className={cn(
-                    "bg-background flex flex-col h-full relative",
-                    isMobile && selectedChatId ? "w-full" : "flex-1"
-                )}>
-                    {selectedChat ? (
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="flex flex-col h-full"
-                        >
-                            <ConversationHeader
-                                chat={selectedChat}
-                                onBack={handleBackToList}
-                            />
-                            <div className="flex-1 overflow-y-auto bg-background">
-                                <MessageList messages={selectedChat.conversation.messages} />
-                                <div ref={messageEndRef} />
-                            </div>
-                            <div className="p-4 border-t bg-card/50 backdrop-blur-sm">
-                                <MessageInput
-                                    message={newMessage}
-                                    onMessageChange={handleMessageChange}
-                                    onSend={handleSendMessage}
-                                    onKeyPress={handleKeyPress}
-                                />
-                            </div>
-                        </motion.div>
-                    ) : (
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="h-full"
-                        >
-                            <EmptyState />
-                        </motion.div>
-                    )}
-                </div>
+            {/* Área de Conversación */}
+            <div className={cn(
+                "flex-1 flex flex-col",
+                // En móvil, ocupar toda la pantalla cuando hay chat seleccionado
+                isMobile && chatId ? "w-full" : "",
+                // En móvil sin chat, ocultar completamente
+                isMobile && !chatId ? "hidden" : ""
+            )}>
+                {chatId && selectedChat ? (
+                    <motion.div
+                        key={chatId}
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        className="flex flex-col h-full"
+                    >
+                        <ConversationHeader
+                            chat={selectedChat}
+                            onBack={handleBackToList}
+                        />
+                        <MessageList
+                            messages={selectedChat.messages}
+                            isLoading={isChatLoading}
+                        />
+                        <div ref={messageEndRef}/>
+                        <MessageInput
+                            message={newMessage}
+                            onMessageChange={setNewMessage}
+                            onSend={handleSendMessage}
+                            onKeyPress={handleKeyPress}
+                        />
+                    </motion.div>
+                ) : (
+                    // Solo mostrar EmptyState en desktop cuando no hay chat seleccionado
+                    !isMobile && <EmptyState/>
+                )}
             </div>
         </div>
     );
