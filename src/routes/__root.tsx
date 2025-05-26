@@ -1,8 +1,10 @@
-import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router'
-import { Layout } from '../components/layout'
 import { useAuth } from '@clerk/clerk-react'
 import { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router'
+import { Toaster } from 'sonner'
+import { Layout } from '../components/layout'
+import { useWebSocket } from '../hooks/useWebSocket'
 
 const publicRoutes = ['/sign-in', '/sign-up']
 
@@ -11,11 +13,16 @@ const isPublicRoute = (pathname: string) => {
 }
 
 const RouteComponent = () => {
-  const { isSignedIn, isLoaded } = useAuth()
+  const { isSignedIn, isLoaded, userId } = useAuth()
+  const { emit } = useWebSocket()
 
   // Get the current pathname
   const pathname = window.location.pathname
   const currentRouteIsPublic = isPublicRoute(pathname)
+
+  if (isSignedIn) {
+    emit('joinBusinessRoom', userId)
+  }
 
   // If Clerk is still loading, show a loading state
   if (!isLoaded) {
@@ -65,8 +72,8 @@ const RouteComponent = () => {
       <Layout>
         <Outlet />
       </Layout>
-      <ReactQueryDevtools buttonPosition="top-right" />
-
+      <ReactQueryDevtools buttonPosition="bottom-right" />
+      <Toaster position="top-center" />
     </>
   )
 }
