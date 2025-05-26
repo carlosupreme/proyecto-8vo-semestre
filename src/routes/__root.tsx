@@ -2,6 +2,7 @@ import { useAuth } from '@clerk/clerk-react'
 import { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { Toaster } from 'sonner'
 import { Layout } from '../components/layout'
 import { useWebSocket } from '../hooks/useWebSocket'
@@ -20,9 +21,12 @@ const RouteComponent = () => {
   const pathname = window.location.pathname
   const currentRouteIsPublic = isPublicRoute(pathname)
 
-  if (isSignedIn) {
-    emit('joinBusinessRoom', userId)
-  }
+
+  useEffect(() => {
+    if (isSignedIn && userId) {
+      emit('joinBusinessRoom', userId)
+    }
+  }, [isSignedIn, userId, emit]) // Only run when these values change
 
   // If Clerk is still loading, show a loading state
   if (!isLoaded) {
