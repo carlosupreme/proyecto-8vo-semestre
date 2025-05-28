@@ -1,11 +1,11 @@
-import {useAuth} from '@clerk/clerk-react'
-import {QueryClient} from '@tanstack/react-query'
-import {Link, Outlet, createRootRouteWithContext} from '@tanstack/react-router'
-import {useEffect} from 'react'
-import {Toaster} from 'sonner'
-import {Layout} from '../components/layout'
-import {useWebSocket} from '../hooks/useWebSocket'
-import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import { useAuth } from '@clerk/clerk-react'
+import { QueryClient } from '@tanstack/react-query'
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { Toaster } from 'sonner'
+import { Layout } from '../components/layout'
+import { useWebSocket } from '../hooks/useWebSocket'
 
 const publicRoutes = ['/sign-in', '/sign-up']
 
@@ -24,6 +24,12 @@ const RouteComponent = () => {
 
     useEffect(() => {
         if (isSignedIn && userId) {
+            const userIdStored = localStorage.getItem("userId");
+
+            if(!userIdStored || userIdStored !== userId){
+                localStorage.setItem("userId", userId)
+            }
+
             emit('joinBusinessRoom', userId)
         }
     }, [isSignedIn, userId, emit]) // Only run when these values change

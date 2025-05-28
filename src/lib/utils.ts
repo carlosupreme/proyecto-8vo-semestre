@@ -26,6 +26,21 @@ export function formatTimestamp(timestamp: number): string {
   });
 };
 
+export function getAppointmentColor(id: string): string {
+  const colors = [
+    'bg-rose-500',
+    'bg-sky-500',
+    'bg-amber-500',
+    'bg-emerald-500',
+    'bg-violet-500',
+    'bg-indigo-500',
+    'bg-pink-500',
+  ];
+  
+  const colorIndex = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+  return colors[colorIndex];
+}
+
 export function formatMessageTime(timestamp: number): string {
   const date = new Date(timestamp);
 

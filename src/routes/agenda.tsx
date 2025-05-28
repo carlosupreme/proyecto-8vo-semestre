@@ -1,9 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
+import AgendaPage from '../domains/agenda'
 
 export const Route = createFileRoute('/agenda')({
-  component: RouteComponent,
+  component: AgendaPage,
 })
 
-function RouteComponent() {
-  return <div>Hello "/agenda"!</div>
-}

@@ -1,14 +1,13 @@
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {Alert, AlertDescription} from "@/components/ui/alert";
-import {format} from "date-fns";
-import type {Message} from "@/domains/chats/types.ts";
-import React, {useCallback, useMemo, useRef, useState} from "react";
-import {AlertCircle, Check, MessageSquare, RefreshCw} from "lucide-react";
-import {Button} from "@/components/ui/button.tsx";
-import {DateSeparator} from "@/domains/chats/components/conversation/DateSeparator.tsx";
-import {MessageBubble} from "@/domains/chats/components/conversation/MessageBubble.tsx";
-import {AnimatePresence, motion} from "framer-motion";
-import {TypingIndicator} from "@/domains/chats/components/conversation/TypingIndicator.tsx";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button.tsx";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { DateSeparator } from "@/domains/chats/components/conversation/DateSeparator.tsx";
+import { MessageBubble } from "@/domains/chats/components/conversation/MessageBubble.tsx";
+import type { Message } from "@/domains/chats/types.ts";
+import { format } from "date-fns";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertCircle, Check, MessageSquare, RefreshCw } from "lucide-react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 
 interface MessageListProps {
     messages: Message[];
@@ -166,7 +165,7 @@ export function MessageList({
                 ))}
 
                 {/* Indicador de escritura */}
-                <TypingIndicator/>
+                {/* <TypingIndicator/> */}
             </ScrollArea>
 
             {/* Toast de copiado */}

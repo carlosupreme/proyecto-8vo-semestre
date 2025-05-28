@@ -263,7 +263,7 @@ export function ConnectWhatsApp({
                             onClick={handleRefresh}
                             variant="ghost"
                             size="sm"
-                            className="text-xs"
+                            className="cursor-pointer text-xs"
                         >
                             <RefreshCw className="w-3 h-3 mr-1" />
                             Actualizar código

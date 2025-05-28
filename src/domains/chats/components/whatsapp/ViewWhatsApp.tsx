@@ -1,9 +1,9 @@
-import { 
-    Loader2, 
-    MessageSquare, 
-    Phone, 
-    User, 
-    Shield, 
+import {
+    Loader2,
+    MessageSquare,
+    Phone,
+    User,
+    Shield,
     Unlink,
     RefreshCw,
     AlertCircle,
@@ -11,20 +11,20 @@ import {
     Copy,
     ExternalLink
 } from "lucide-react";
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogHeader, 
-    DialogTitle, 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
     DialogDescription,
     DialogFooter,
-    DialogClose 
+    DialogClose
 } from "../../../../components/ui/dialog";
 import { Button } from "../../../../components/ui/button";
 import { Badge } from "../../../../components/ui/badge";
 import { Separator } from "../../../../components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar";
-import { 
+import {
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -39,17 +39,19 @@ import { useClientInfo } from "../../hooks/useClientInfo";
 import { useState } from "react";
 import { toast } from "sonner"
 import { useDisconnectWhatsApp } from "../../hooks/useDisconnectWhatsApp";
- 
-export function ViewWhatsApp({ 
-    open, 
-    onOpenChange 
-}: { 
-    open: boolean; 
-    onOpenChange: (open: boolean) => void 
+
+export function ViewWhatsApp({
+    open,
+    onOpenChange
+}: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void,
 }) {
     const { data: whatsappData, isLoading, error, refetch } = useClientInfo();
     const [isDisconnecting, setIsDisconnecting] = useState(false);
     const { disconnectWhatsApp } = useDisconnectWhatsApp();
+
+
 
     const handleCopyId = async () => {
         if (whatsappData?.data?.contactId) {
@@ -130,6 +132,11 @@ export function ViewWhatsApp({
         );
     }
 
+    if (whatsappData.status === "error") {
+        return;
+    }
+
+
     const { displayName, formattedNumber, profilePicUrl, contactId } = whatsappData.data;
 
     return (
@@ -155,15 +162,15 @@ export function ViewWhatsApp({
                     {/* Profile Section */}
                     <div className="flex items-center space-x-4 p-4 bg-green-50 rounded-lg border border-green-200">
                         <Avatar className="w-16 h-16 border-2 border-green-200">
-                            <AvatarImage 
-                                src={profilePicUrl} 
+                            <AvatarImage
+                                src={profilePicUrl}
                                 alt={`Foto de perfil de ${displayName}`}
                             />
                             <AvatarFallback className="bg-green-100 text-green-700 text-lg font-semibold">
                                 {displayName?.charAt(0)?.toUpperCase() || <User className="w-6 h-6" />}
                             </AvatarFallback>
                         </Avatar>
-                        
+
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-2 mb-1">
                                 <h3 className="text-lg font-semibold text-green-800 truncate">
@@ -191,7 +198,7 @@ export function ViewWhatsApp({
                             <User className="w-4 h-4 mr-2" />
                             Detalles de la cuenta
                         </h4>
-                        
+
                         <div className="grid gap-3">
                             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div>
@@ -203,7 +210,7 @@ export function ViewWhatsApp({
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div>
                                     <p className="text-sm font-medium text-gray-700">
@@ -214,7 +221,7 @@ export function ViewWhatsApp({
                                     </p>
                                 </div>
                             </div>
-                            
+
                             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium text-gray-700">
@@ -244,7 +251,7 @@ export function ViewWhatsApp({
                             <Shield className="w-4 h-4 mr-2" />
                             Seguridad y privacidad
                         </h4>
-                        
+
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                             <div className="flex items-start space-x-2">
                                 <Shield className="w-4 h-4 text-blue-600 mt-0.5" />
@@ -274,7 +281,7 @@ export function ViewWhatsApp({
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Actualizar
                         </Button>
-                        
+
                         <Button
                             onClick={() => window.open('https://web.whatsapp.com', '_blank')}
                             variant="outline"
@@ -289,8 +296,8 @@ export function ViewWhatsApp({
                     <div className="flex gap-2 w-full sm:w-auto">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button 
-                                    variant="destructive" 
+                                <Button
+                                    variant="destructive"
                                     size="sm"
                                     className="flex-1 sm:flex-none"
                                     disabled={isDisconnecting}
@@ -305,13 +312,13 @@ export function ViewWhatsApp({
                                         ¿Desconectar WhatsApp?
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Clara perderá acceso a tus conversaciones de WhatsApp. 
+                                        Clara perderá acceso a tus conversaciones de WhatsApp.
                                         Podrás reconectar en cualquier momento.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction 
+                                    <AlertDialogAction
                                         onClick={handleDisconnect}
                                         className="bg-red-600 hover:bg-red-700"
                                     >
