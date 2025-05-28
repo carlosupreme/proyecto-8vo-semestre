@@ -37,6 +37,7 @@ export function ChatLayout({ chatId, showChatList = true }: ChatLayoutProps) {
     }, [chats, searchTerm]);
 
     const handleChatSelect = (selectedChatId: string) => {
+        localStorage.setItem('bar', 'false');
         void navigate({to: `/chats/${selectedChatId}`});
     };
 
