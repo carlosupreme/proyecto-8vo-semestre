@@ -22,7 +22,7 @@ export const appointmentKeys = {
 /**
  * Hook for fetching appointments by date range
  */
-export function useAppointments(startDate: Date, endDate: Date, businessId?: string) {
+export function useAppointments(startDate: Date, endDate: Date) {
   const formattedStartDate = format(startDate, 'yyyy-MM-dd');
   const formattedEndDate = format(endDate, 'yyyy-MM-dd');
   
@@ -30,12 +30,10 @@ export function useAppointments(startDate: Date, endDate: Date, businessId?: str
     queryKey: appointmentKeys.list({ 
       startDate: formattedStartDate, 
       endDate: formattedEndDate,
-      businessId 
     }),
     queryFn: () => fetchAppointments({ 
       startDate: formattedStartDate, 
       endDate: formattedEndDate,
-      businessId 
     }),
   });
 }
@@ -43,31 +41,31 @@ export function useAppointments(startDate: Date, endDate: Date, businessId?: str
 /**
  * Hook for fetching appointments for a specific day
  */
-export function useDayAppointments(date: Date, businessId?: string) {
+export function useDayAppointments(date: Date) {
   const dayStart = startOfDay(date);
   const dayEnd = endOfDay(date);
   
-  return useAppointments(dayStart, dayEnd, businessId);
+  return useAppointments(dayStart, dayEnd);
 }
 
 /**
  * Hook for fetching appointments for a specific week
  */
-export function useWeekAppointments(date: Date, businessId?: string) {
+export function useWeekAppointments(date: Date) {
   const weekStart = startOfWeek(date, { weekStartsOn: 1 }); // Week starts on Monday
   const weekEnd = endOfWeek(date, { weekStartsOn: 1 });
   
-  return useAppointments(weekStart, weekEnd, businessId);
+  return useAppointments(weekStart, weekEnd);
 }
 
 /**
  * Hook for fetching appointments for a specific month
  */
-export function useMonthAppointments(date: Date, businessId?: string) {
+export function useMonthAppointments(date: Date) {
   const monthStart = startOfMonth(date);
   const monthEnd = endOfMonth(date);
   
-  return useAppointments(monthStart, monthEnd, businessId);
+  return useAppointments(monthStart, monthEnd);
 }
 
 /**

@@ -8,14 +8,14 @@ export const socket = io(import.meta.env.VITE_WS_URL || 'http://localhost:3000')
 
 socket.on(
     'newClientMessage',
-    async (data: { conversationId: string; message: Message }) => {
+    async (_data: { conversationId: string; message: Message }) => {
         await queryClient.invalidateQueries({
             queryKey: ['chats'],
         })
     }
 )
 
-socket.on('assistantFailed', (data: { conversationId: string }) => {
+socket.on('assistantFailed', (_data: { conversationId: string }) => {
     toast.error('El asistente tuvo un problema al ejecutar una accion')
 })
 

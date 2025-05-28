@@ -1,11 +1,8 @@
-"use client"
-
 import { useState } from "react"
 
 interface WelcomeCardProps {
   userName?: string
   greeting?: string
-  date?: string
   showLogo?: boolean
   onClaraToggle?: (enabled: boolean) => void
 }
@@ -13,7 +10,6 @@ interface WelcomeCardProps {
 export default function WelcomeCard({
   userName = "Isabella Martinez",
   greeting = "Clara",
-  date = "Last Update Monday, 16 Jul",
   showLogo = true,
   onClaraToggle,
 }: WelcomeCardProps) {

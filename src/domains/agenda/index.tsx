@@ -28,14 +28,14 @@ export default function CalendarPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   // Used in scroll event handler
-  const [scrollY, setScrollY] = useState(0)
+  const [_scrollY, setScrollY] = useState(0)
   const [isStacked, setIsStacked] = useState(false)
   
   // Fetch appointments for the selected date
   const { data: appointments = [] } = useDayAppointments(selectedDate)
 
-  const isMobile = useMediaQuery("(max-width: 768px)")
-  const isTablet = useMediaQuery("(max-width: 1099px)")
+  // const isMobile = useMediaQuery("(max-width: 768px)")
+  // const isTablet = useMediaQuery("(max-width: 1099px)")
   const isDesktop = useMediaQuery("(min-width: 1100px)")
 
   const summaryCardRef = useRef(null)
