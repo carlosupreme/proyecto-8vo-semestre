@@ -6,6 +6,7 @@ import { format } from "date-fns"
 import { Plus, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ActivityCard } from "./activity-card"
+import { es } from "date-fns/locale"
 
 type Activity = {
   id: number
@@ -238,7 +239,7 @@ export function ActivityDrawer({
         )}
         
         <div className={isStatic ? "" : "pt-2"}>
-          <h3 className="text-lg font-semibold text-gray-800">{format(selectedDate, "EEEE d, MMMM yyyy")}</h3>
+          <h3 className="text-lg font-semibold text-gray-800 capitalize">{format(selectedDate, "EEEE d, MMMM yyyy", {locale: es})}</h3>
           <p className="text-sm text-gray-800">
             {activities.length} {activities.length === 1 ? "activity" : "actividades"}
           </p>
@@ -319,7 +320,7 @@ export function ActivityDrawer({
                   className="bg-[#343b34] hover:bg-black text-white rounded-2xl px-6"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Event
+                  Crear actividad
                 </Button>
               )}
             </div>

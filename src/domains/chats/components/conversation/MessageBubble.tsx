@@ -35,7 +35,7 @@ export function MessageBubble({
                                   onReact
                               }: MessageBubbleProps) {
     const [showActions, setShowActions] = useState(false);
-    const isMe = message.role === "business";
+    const isMe = message.role === "business" || message.role === "assistant";
 
     const handleCopy = () => {
         onCopy(message.content);

@@ -1,14 +1,16 @@
 import { Plus } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "../../components/ui/button"
 import { useMediaQuery } from "../../hooks/use-media-query"
+import { useWebSocket } from "../../hooks/useWebSocket"
+import { useGetUser } from "../account/hooks/useGetUser"
 import { ActivityDrawer } from "./components/activity-drawer"
 import { CalendarView } from "./components/calendar-view"
 import { CreateActivityDialog } from "./components/create-activity-dialog"
 import WelcomeCard from "./components/welcome-card"
 import { useDayAppointments } from "./hooks/use-appointments"
-import { minutesToTimeString } from "./types"
 import type { Appointment } from "./types"
+import { minutesToTimeString } from "./types"
 
 // Activity type expected by UI components
 type Activity = {
@@ -30,8 +32,7 @@ export default function CalendarPage() {
   // Used in scroll event handler
   const [_scrollY, setScrollY] = useState(0)
   const [isStacked, setIsStacked] = useState(false)
-  
-  // Fetch appointments for the selected date
+
   const { data: appointments = [] } = useDayAppointments(selectedDate)
 
   // const isMobile = useMediaQuery("(max-width: 768px)")
@@ -41,16 +42,30 @@ export default function CalendarPage() {
   const summaryCardRef = useRef(null)
   const calendarCardRef = useRef(null)
   const activitiesCardRef = useRef(null)
-  
+  const { data: user } = useGetUser()
+  const { emit } = useWebSocket()
+
   const handleClaraToggle = (enabled: boolean) => {
     console.log('CLARA está:', enabled ? 'activada' : 'desactivada')
+
+    const userId = user?.id || localStorage.getItem("userId")
+
+    if (enabled) {
+      emit("enableAllAssistants", userId)
+
+    } else {
+      emit("disableAllAssistants", userId)
+    }
+
   }
 
+  const isEnabled = useMemo(() => user?.assistantConfig.enabled || false, [user])
+
   // Format appointments to match the UI component requirements
-  const formattedAppointments: Activity[] = appointments.map((appointment: Appointment, index) => ({
+  const formattedAppointments: Activity[] = appointments.map((appointment: Appointment) => ({
     // Convert string ID to number for UI components
-    id: index + 1,
-    name: appointment.title || 'Untitled Appointment',
+    id: +appointment.id,
+    name: appointment.title || 'Actividad',
     description: appointment.notes,
     startTime: minutesToTimeString(appointment.timeRange.startAt),
     endTime: minutesToTimeString(appointment.timeRange.endAt),
@@ -62,9 +77,9 @@ export default function CalendarPage() {
 
   // Get today's date in ISO format
   const today = new Date().toISOString().split("T")[0]
-  
+
   // Count of today's appointments
-  const todayAppointmentsCount = appointments.filter(appointment => 
+  const todayAppointmentsCount = appointments.filter(appointment =>
     appointment.date === today
   ).length
 
@@ -127,7 +142,7 @@ export default function CalendarPage() {
       {isDesktop && (
         <ActivityDrawer
           isOpen={true}
-          onClose={() => {}} // No se usa en modo estático
+          onClose={() => { }} // No se usa en modo estático
           activities={formattedAppointments}
           selectedDate={selectedDate}
           position="left"
@@ -144,7 +159,9 @@ export default function CalendarPage() {
             {/* Main Content - Left Side */}
             <div className={`${isDesktop ? "col-span-9" : "w-full"} space-y-4`}>
               <main className="">
-                <WelcomeCard onClaraToggle={handleClaraToggle}  />
+                <WelcomeCard
+                  isEnabled={isEnabled}
+                  onClaraToggle={handleClaraToggle} userName={user?.name} />
               </main>
 
               {/* Today's Summary Card */}

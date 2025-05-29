@@ -19,15 +19,15 @@ interface MessageListProps {
 }
 
 export function MessageList({
-                                messages,
-                                isLoading = false,
-                                error = null,
-                                onRetry = () => {
-                                },
-                                hasMore = false,
-                                onLoadMore = () => {
-                                }
-                            }: MessageListProps) {
+    messages,
+    isLoading = false,
+    error = null,
+    onRetry = () => {
+    },
+    hasMore = false,
+    onLoadMore = () => {
+    }
+}: MessageListProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [_replyTo, setReplyTo] = useState<Message | null>(null);
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
@@ -54,7 +54,7 @@ export function MessageList({
     };
 
     const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-        const {scrollTop} = e.currentTarget;
+        const { scrollTop } = e.currentTarget;
         if (scrollTop === 0 && hasMore && !isLoading) {
             onLoadMore();
         }
@@ -86,11 +86,11 @@ export function MessageList({
         return (
             <div className="flex-1 flex items-center justify-center p-4">
                 <Alert variant="destructive" className="max-w-md">
-                    <AlertCircle className="h-4 w-4"/>
+                    <AlertCircle className="h-4 w-4" />
                     <AlertDescription className="space-y-2">
                         <p>Error al cargar los mensajes</p>
                         <Button onClick={onRetry} variant="outline" size="sm">
-                            <RefreshCw className="w-4 h-4 mr-2"/>
+                            <RefreshCw className="w-4 h-4 mr-2" />
                             Reintentar
                         </Button>
                     </AlertDescription>
@@ -104,7 +104,7 @@ export function MessageList({
             <div className="flex-1 flex items-center justify-center p-8">
                 <div className="text-center space-y-4">
                     <div className="p-4 bg-gray-100 rounded-full inline-flex">
-                        <MessageSquare className="w-12 h-12 text-gray-400"/>
+                        <MessageSquare className="w-12 h-12 text-gray-400" />
                     </div>
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-900">
@@ -130,7 +130,7 @@ export function MessageList({
                 {isLoading && messages.length > 0 && (
                     <div className="flex justify-center py-4">
                         <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <RefreshCw className="w-4 h-4 animate-spin"/>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
                             Cargando mensajes anteriores...
                         </div>
                     </div>
@@ -139,13 +139,14 @@ export function MessageList({
                 {/* Mensajes agrupados por fecha */}
                 {groupedMessages.map((group, groupIndex) => (
                     <div key={group.date}>
-                        <DateSeparator timestamp={new Date(group.date).getTime()}/>
+                        <DateSeparator timestamp={new Date(group.date).getTime()} />
 
                         {group.messages.map((message, index) => {
                             const prevMessage = index > 0 ? group.messages[index - 1] :
                                 groupIndex > 0 ? groupedMessages[groupIndex - 1].messages[groupedMessages[groupIndex - 1].messages.length - 1] :
                                     null;
-                            const isSameSender = prevMessage?.role === message.role;
+
+                            const isSameSender = !!!(prevMessage);
                             const replyToMsg = message.replyTo ? messages.find(m => m.id === message.replyTo) : undefined;
 
                             return (
@@ -172,12 +173,12 @@ export function MessageList({
             <AnimatePresence>
                 {copiedMessageId && (
                     <motion.div
-                        initial={{opacity: 0, y: 20}}
-                        animate={{opacity: 1, y: 0}}
-                        exit={{opacity: 0, y: 20}}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
                         className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg flex items-center gap-2"
                     >
-                        <Check className="w-4 h-4"/>
+                        <Check className="w-4 h-4" />
                         <span className="text-sm">Mensaje copiado</span>
                     </motion.div>
                 )}

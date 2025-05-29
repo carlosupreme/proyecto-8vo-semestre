@@ -4,6 +4,7 @@ interface WelcomeCardProps {
   userName?: string
   greeting?: string
   showLogo?: boolean
+  isEnabled?: boolean
   onClaraToggle?: (enabled: boolean) => void
 }
 
@@ -12,8 +13,9 @@ export default function WelcomeCard({
   greeting = "Clara",
   showLogo = true,
   onClaraToggle,
+  isEnabled = true,
 }: WelcomeCardProps) {
-  const [claraEnabled, setClaraEnabled] = useState(true)
+  const [claraEnabled, setClaraEnabled] = useState(isEnabled)
 
   const handleSwitchChange = () => {
     const newState = !claraEnabled

@@ -1,13 +1,13 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  fetchAppointments, 
-  createAppointment, 
-  updateAppointment, 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { endOfMonth, endOfWeek, format, startOfMonth, startOfWeek } from 'date-fns';
+import {
+  createAppointment,
   deleteAppointment,
+  fetchAppointments,
+  updateAppointment,
   type AppointmentQueryParams
 } from '../appointment-service';
 import type { AppointmentPrimitives } from '../types';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, format } from 'date-fns';
 
 // Query keys for React Query
 export const appointmentKeys = {
@@ -42,10 +42,7 @@ export function useAppointments(startDate: Date, endDate: Date) {
  * Hook for fetching appointments for a specific day
  */
 export function useDayAppointments(date: Date) {
-  const dayStart = startOfDay(date);
-  const dayEnd = endOfDay(date);
-  
-  return useAppointments(dayStart, dayEnd);
+  return useAppointments(date,date );
 }
 
 /**
