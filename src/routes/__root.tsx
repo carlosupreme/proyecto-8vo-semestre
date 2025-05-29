@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 import { Toaster } from 'sonner'
 import { Layout } from '../components/layout'
 import { useWebSocket } from '../hooks/useWebSocket'
+import { OpenaiProvider } from '../contexts/OpenaiContext'
 
 const publicRoutes = ['/sign-in', '/sign-up']
 
@@ -14,8 +15,8 @@ const isPublicRoute = (pathname: string) => {
 }
 
 const RouteComponent = () => {
-    const {isSignedIn, isLoaded, userId} = useAuth()
-    const {emit} = useWebSocket()
+    const { isSignedIn, isLoaded, userId } = useAuth()
+    const { emit } = useWebSocket()
 
     // Get the current pathname
     const pathname = window.location.pathname
@@ -26,7 +27,7 @@ const RouteComponent = () => {
         if (isSignedIn && userId) {
             const userIdStored = localStorage.getItem("userId");
 
-            if(!userIdStored || userIdStored !== userId){
+            if (!userIdStored || userIdStored !== userId) {
                 localStorage.setItem("userId", userId)
             }
 
@@ -72,7 +73,7 @@ const RouteComponent = () => {
     if (currentRouteIsPublic) {
         return (
             <>
-                <Outlet/>
+                <Outlet />
             </>
         )
     }
@@ -80,11 +81,13 @@ const RouteComponent = () => {
     // For authenticated routes, render with the NavBar
     return (
         <>
-            <Layout>
-                <Outlet/>
-            </Layout>
-            <Toaster position="top-center"/>
-            <ReactQueryDevtools/>
+            <OpenaiProvider>
+                <Layout>
+                    <Outlet />
+                </Layout>
+            </OpenaiProvider>
+            <Toaster position="top-center" />
+            <ReactQueryDevtools />
         </>
     )
 }

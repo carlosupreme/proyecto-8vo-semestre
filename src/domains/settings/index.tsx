@@ -5,25 +5,26 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
+    AlertCircle,
     Bot,
     Brain,
     Briefcase,
     Check,
-    Gauge,
     Heart,
     Info,
     Languages,
     Laptop,
+    Loader2,
     Moon,
     Palette,
+    RefreshCw,
     Save,
     SettingsIcon,
     Shield,
@@ -32,15 +33,20 @@ import {
     Trash2,
     Zap
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useOpenAIAssistant, useUpdateAssistant, useAvailableModels } from "../../hooks/useOpenAIAssistant";
+import { RunParametersCard } from "./RunParametersCard";
 
 export function Settings() {
+    const { data: assistant, isLoading: isAssistantLoading, error: assistantError, refetch } = useOpenAIAssistant();
+    const { data: availableModels, isLoading: isModelsLoading } = useAvailableModels();
+    const updateAssistantMutation = useUpdateAssistant();
+
     const [assistantConfig, setAssistantConfig] = useState({
-        name: "Clara",
-        prompt: "Eres Clara, una asistente virtual amigable y servicial. Tu objetivo es ayudar al usuario con sus tareas y responder a sus preguntas de manera clara y concisa.",
-        temperature: 0.7,
-        maxTokens: 2048,
-        avatar: "friendly",
+        name: "",
+        instructions: "",
+        model: "",
+        description: "",
         personality: "friendly"
     });
 
@@ -48,7 +54,36 @@ export function Settings() {
     const [language, setLanguage] = useState("es");
     const [saveHistory, setSaveHistory] = useState(true);
     const [analytics, setAnalytics] = useState(false);
-    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
+
+    // Sincronizar con datos del asistente
+    useEffect(() => {
+        if (assistant) {
+            setAssistantConfig({
+                name: assistant.name || "",
+                instructions: assistant.instructions || "",
+                model: assistant.model || "",
+                description: assistant.description || "",
+                personality: assistant.metadata?.personality || "friendly"
+            });
+        }
+    }, [assistant]);
+
+    // Detectar cambios
+    useEffect(() => {
+        if (assistant) {
+            const originalConfig = {
+                name: assistant.name || "",
+                instructions: assistant.instructions || "",
+                model: assistant.model || "",
+                description: assistant.description || "",
+                personality: assistant.metadata?.personality || "friendly"
+            };
+            
+            const hasConfigChanges = JSON.stringify(originalConfig) !== JSON.stringify(assistantConfig);
+            setHasChanges(hasConfigChanges);
+        }
+    }, [assistant, assistantConfig]);
 
     const personalities = [
         { 
@@ -56,44 +91,36 @@ export function Settings() {
             name: "Amigable", 
             icon: <Heart className="w-4 h-4" />, 
             description: "Cálido y cercano",
-            prompt: "Eres un asistente amigable y servicial. Tu objetivo es ayudar con calidez y empatía."
+            instructions: "Eres un asistente amigable y servicial. Responde con calidez y empatía, usando un tono cercano y comprensivo."
         },
         { 
             id: "professional", 
             name: "Profesional", 
             icon: <Briefcase className="w-4 h-4" />, 
             description: "Formal y eficiente",
-            prompt: "Eres un asistente profesional y eficiente. Proporcionas respuestas claras y concisas."
+            instructions: "Eres un asistente profesional y eficiente. Proporcionas respuestas claras, concisas y bien estructuradas."
         },
         { 
             id: "creative", 
             name: "Creativo", 
             icon: <Sparkles className="w-4 h-4" />, 
             description: "Innovador y original",
-            prompt: "Eres un asistente creativo e innovador. Ofreces soluciones originales y pensamiento lateral."
+            instructions: "Eres un asistente creativo e innovador. Ofreces soluciones originales, pensamiento lateral y enfoques únicos."
         },
         { 
             id: "technical", 
             name: "Técnico", 
             icon: <Brain className="w-4 h-4" />, 
             description: "Preciso y detallado",
-            prompt: "Eres un asistente técnico y preciso. Proporcionas información detallada y exacta."
+            instructions: "Eres un asistente técnico y preciso. Proporcionas información detallada, exacta y bien fundamentada."
         }
     ];
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
+    const handleInputChange = (field: string, value: string) => {
         setAssistantConfig(prev => ({
             ...prev,
-            [name]: value
+            [field]: value
         }));
-    };
-
-    const handleSave = () => {
-        localStorage.setItem("assistantConfig", JSON.stringify(assistantConfig));
-        localStorage.setItem("appSettings", JSON.stringify({ theme, language, saveHistory, analytics }));
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
     };
 
     const handlePersonalityChange = (personalityId: string) => {
@@ -102,17 +129,68 @@ export function Settings() {
             setAssistantConfig(prev => ({
                 ...prev,
                 personality: personalityId,
-                prompt: personality.prompt
+                instructions: personality.instructions
             }));
         }
     };
 
-    const getTemperatureDescription = (value: number) => {
-        if (value <= 0.3) return "Muy preciso y consistente";
-        if (value <= 0.5) return "Balanceado";
-        if (value <= 0.7) return "Creativo y variado";
-        return "Muy creativo e impredecible";
+    const handleSaveAssistant = async () => {
+        try {
+            await updateAssistantMutation.mutateAsync({
+                name: assistantConfig.name,
+                instructions: assistantConfig.instructions,
+                model: assistantConfig.model,
+                description: assistantConfig.description,
+                metadata: {
+                    personality: assistantConfig.personality
+                }
+            });
+
+            // Guardar configuraciones locales
+            localStorage.setItem("appSettings", JSON.stringify({ theme, language, saveHistory, analytics }));
+        } catch (error) {
+            console.error('Error saving assistant:', error);
+        }
     };
+
+    const handleRefresh = () => {
+        refetch();
+    };
+
+    if (isAssistantLoading) {
+        return (
+            <div className="container mx-auto p-6 pb-20 max-w-6xl">
+                <div className="flex items-center justify-center h-64">
+                    <div className="flex items-center gap-3">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                        <p>Cargando configuración del asistente...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (assistantError) {
+        return (
+            <div className="container mx-auto p-6 pb-20 max-w-6xl">
+                <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20">
+                    <AlertCircle className="w-4 h-4 text-red-600" />
+                    <AlertDescription className="text-red-800 dark:text-red-200">
+                        Error al cargar el asistente: {assistantError.message}
+                        <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="ml-3"
+                            onClick={handleRefresh}
+                        >
+                            <RefreshCw className="w-4 h-4 mr-1" />
+                            Reintentar
+                        </Button>
+                    </AlertDescription>
+                </Alert>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-6 pb-20 max-w-6xl">
@@ -123,33 +201,59 @@ export function Settings() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold">Configuración</h1>
-                        <p className="text-sm text-muted-foreground">Personaliza tu experiencia</p>
+                        <p className="text-sm text-muted-foreground">
+                            Personaliza tu asistente de IA
+                        </p>
                     </div>
                 </div>
-                <Button 
-                    onClick={handleSave} 
-                    className="gap-2"
-                    variant={saveSuccess ? "default" : "default"}
-                >
-                    {saveSuccess ? (
-                        <>
-                            <Check className="w-4 h-4" />
-                            Guardado
-                        </>
-                    ) : (
-                        <>
-                            <Save className="w-4 h-4" />
-                            Guardar cambios
-                        </>
-                    )}
-                </Button>
+                <div className="flex gap-2">
+                    <Button 
+                        variant="outline"
+                        onClick={handleRefresh}
+                        disabled={isAssistantLoading}
+                    >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${isAssistantLoading ? 'animate-spin' : ''}`} />
+                        Actualizar
+                    </Button>
+                    <Button 
+                        onClick={handleSaveAssistant} 
+                        disabled={!hasChanges || updateAssistantMutation.isPending}
+                        className="gap-2"
+                    >
+                        {updateAssistantMutation.isPending ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Guardando...
+                            </>
+                        ) : updateAssistantMutation.isSuccess ? (
+                            <>
+                                <Check className="w-4 h-4" />
+                                Guardado
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4" />
+                                Guardar cambios
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
 
-            {saveSuccess && (
+            {updateAssistantMutation.isSuccess && (
                 <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950/20">
                     <Check className="w-4 h-4 text-green-600" />
                     <AlertDescription className="text-green-800 dark:text-green-200">
-                        ¡Configuración guardada exitosamente!
+                        ¡Asistente actualizado exitosamente!
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            {updateAssistantMutation.isError && (
+                <Alert className="mb-6 border-red-200 bg-red-50 dark:bg-red-950/20">
+                    <AlertCircle className="w-4 h-4 text-red-600" />
+                    <AlertDescription className="text-red-800 dark:text-red-200">
+                        Error al actualizar: {updateAssistantMutation.error?.message}
                     </AlertDescription>
                 </Alert>
             )}
@@ -175,10 +279,10 @@ export function Settings() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Bot className="w-5 h-5" />
-                                Personaliza tu Asistente
+                                Información del Asistente
                             </CardTitle>
                             <CardDescription>
-                                Dale una personalidad única a tu asistente de IA
+                                Configuración básica de tu asistente de IA
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
@@ -186,29 +290,87 @@ export function Settings() {
                             <div className="bg-muted/50 rounded-lg p-6 text-center space-y-3">
                                 <Avatar className="w-20 h-20 mx-auto">
                                     <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${assistantConfig.name}`} />
-                                    <AvatarFallback>{assistantConfig.name[0]}</AvatarFallback>
+                                    <AvatarFallback>{assistantConfig.name?.[0] || 'A'}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <h3 className="font-semibold text-lg">{assistantConfig.name}</h3>
-                                    <p className="text-sm text-muted-foreground">Tu asistente personal</p>
+                                    <h3 className="font-semibold text-lg">{assistantConfig.name || 'Sin nombre'}</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        {assistantConfig.description || 'Tu asistente personal'}
+                                    </p>
+                                    {assistant && (
+                                        <Badge variant="secondary" className="mt-2">
+                                            ID: {assistant.id}
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Nombre del asistente */}
                             <div className="space-y-2">
                                 <Label htmlFor="name" className="text-base font-medium">
-                                    Nombre del Asistente
+                                    Nombre del Asistente *
                                 </Label>
                                 <Input
                                     id="name"
-                                    name="name"
                                     value={assistantConfig.name}
-                                    onChange={handleChange}
+                                    onChange={(e) => handleInputChange('name', e.target.value)}
                                     placeholder="Ej: Clara, Max, Luna..."
                                     className="text-lg"
                                 />
                             </div>
 
+                            {/* Descripción */}
+                            <div className="space-y-2">
+                                <Label htmlFor="description" className="text-base font-medium">
+                                    Descripción
+                                </Label>
+                                <Input
+                                    id="description"
+                                    value={assistantConfig.description}
+                                    onChange={(e) => handleInputChange('description', e.target.value)}
+                                    placeholder="Breve descripción de tu asistente..."
+                                />
+                            </div>
+
+                            {/* Modelo */}
+                            <div className="space-y-2">
+                                <Label className="text-base font-medium">
+                                    Modelo de IA
+                                </Label>
+                                <Select 
+                                    value={assistantConfig.model} 
+                                    onValueChange={(value) => handleInputChange('model', value)}
+                                    disabled={isModelsLoading}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder={isModelsLoading ? "Cargando modelos..." : "Selecciona un modelo"} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableModels?.map((model) => (
+                                            <SelectItem key={model.id} value={model.id}>
+                                                {model.id}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground">
+                                    El modelo determina las capacidades y velocidad de respuesta
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Sparkles className="w-5 h-5" />
+                                Personalidad y Comportamiento
+                            </CardTitle>
+                            <CardDescription>
+                                Define cómo se comporta y responde tu asistente
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
                             {/* Personalidad */}
                             <div className="space-y-3">
                                 <Label className="text-base font-medium">
@@ -246,11 +408,11 @@ export function Settings() {
                                 </RadioGroup>
                             </div>
 
-                            {/* Prompt personalizado */}
+                            {/* Instrucciones personalizadas */}
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="prompt" className="text-base font-medium">
-                                        Instrucciones Personalizadas
+                                    <Label htmlFor="instructions" className="text-base font-medium">
+                                        Instrucciones del Sistema
                                     </Label>
                                     <Badge variant="secondary" className="gap-1">
                                         <Zap className="w-3 h-3" />
@@ -258,93 +420,34 @@ export function Settings() {
                                     </Badge>
                                 </div>
                                 <Textarea
-                                    id="prompt"
-                                    name="prompt"
-                                    value={assistantConfig.prompt}
-                                    onChange={handleChange}
-                                    rows={4}
-                                    placeholder="Describe cómo quieres que se comporte tu asistente..."
+                                    id="instructions"
+                                    value={assistantConfig.instructions}
+                                    onChange={(e) => handleInputChange('instructions', e.target.value)}
+                                    rows={6}
+                                    placeholder="Define cómo quieres que se comporte tu asistente..."
                                     className="resize-none"
                                 />
                                 <p className="text-xs text-muted-foreground flex items-start gap-1">
                                     <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                    Puedes agregar detalles específicos sobre cómo quieres que responda
+                                    Estas instrucciones definen el comportamiento base del asistente. 
+                                    Sé específico sobre el tono, estilo y tipo de respuestas que esperas.
                                 </p>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Gauge className="w-5 h-5" />
-                                Parámetros de Respuesta
-                            </CardTitle>
-                            <CardDescription>
-                                Ajusta cómo responde tu asistente
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {/* Temperatura */}
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-base font-medium">
-                                        Creatividad
-                                    </Label>
-                                    <span className="text-sm font-medium text-primary">
-                                        {assistantConfig.temperature}
-                                    </span>
-                                </div>
-                                <Slider
-                                    value={[assistantConfig.temperature]}
-                                    onValueChange={([value]) => 
-                                        setAssistantConfig(prev => ({ ...prev, temperature: value }))
-                                    }
-                                    min={0.1}
-                                    max={1}
-                                    step={0.1}
-                                    className="w-full"
-                                />
-                                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                    <span>Preciso</span>
-                                    <span>Creativo</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
-                                    {getTemperatureDescription(assistantConfig.temperature)}
-                                </p>
-                            </div>
+                    <RunParametersCard />
 
-                            {/* Max Tokens */}
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-base font-medium">
-                                        Longitud de Respuesta
-                                    </Label>
-                                    <span className="text-sm font-medium text-primary">
-                                        {assistantConfig.maxTokens} tokens
-                                    </span>
-                                </div>
-                                <Slider
-                                    value={[assistantConfig.maxTokens]}
-                                    onValueChange={([value]) => 
-                                        setAssistantConfig(prev => ({ ...prev, maxTokens: value }))
-                                    }
-                                    min={256}
-                                    max={4096}
-                                    step={256}
-                                    className="w-full"
-                                />
-                                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                    <span>Corto</span>
-                                    <span>Largo</span>
-                                </div>
-                                <Progress 
-                                    value={(assistantConfig.maxTokens / 4096) * 100} 
-                                    className="h-2"
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {/* Nota sobre la diferencia entre configuración de asistente y run */}
+                    <Alert>
+                        <Info className="w-4 h-4" />
+                        <AlertDescription>
+                            <strong>Configuración del Asistente vs Conversación:</strong><br/>
+                            • La configuración del asistente (nombre, instrucciones, modelo) se aplica globalmente<br/>
+                            • Los parámetros de conversación (temperatura, tokens) se aplican a cada chat individual<br/>
+                            • Ambos tipos de configuración trabajan juntos para personalizar tu experiencia
+                        </AlertDescription>
+                    </Alert>
                 </TabsContent>
 
                 <TabsContent value="general" className="space-y-6">
