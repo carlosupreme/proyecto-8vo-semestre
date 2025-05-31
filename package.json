@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.12.2",
+    "gsap": "^3.13.0",
     "lucide-react": "^0.511.0",
     "openai": "^4.103.0",
     "react": "^19.0.0",

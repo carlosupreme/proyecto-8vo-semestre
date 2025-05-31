@@ -1,23 +1,16 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import {
     AlertCircle,
     Bot,
-    Brain,
-    Briefcase,
     Check,
-    Heart,
     Info,
     Languages,
     Laptop,
@@ -28,13 +21,11 @@ import {
     Save,
     SettingsIcon,
     Shield,
-    Sparkles,
     Sun,
-    Trash2,
-    Zap
+    Trash2
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useOpenAIAssistant, useUpdateAssistant, useAvailableModels } from "../../hooks/useOpenAIAssistant";
+import { useAvailableModels, useOpenAIAssistant, useUpdateAssistant } from "../../hooks/useOpenAIAssistant";
 import { RunParametersCard } from "./RunParametersCard";
 
 export function Settings() {
@@ -79,42 +70,12 @@ export function Settings() {
                 description: assistant.description || "",
                 personality: assistant.metadata?.personality || "friendly"
             };
-            
+
             const hasConfigChanges = JSON.stringify(originalConfig) !== JSON.stringify(assistantConfig);
             setHasChanges(hasConfigChanges);
         }
     }, [assistant, assistantConfig]);
 
-    const personalities = [
-        { 
-            id: "friendly", 
-            name: "Amigable", 
-            icon: <Heart className="w-4 h-4" />, 
-            description: "Cálido y cercano",
-            instructions: "Eres un asistente amigable y servicial. Responde con calidez y empatía, usando un tono cercano y comprensivo."
-        },
-        { 
-            id: "professional", 
-            name: "Profesional", 
-            icon: <Briefcase className="w-4 h-4" />, 
-            description: "Formal y eficiente",
-            instructions: "Eres un asistente profesional y eficiente. Proporcionas respuestas claras, concisas y bien estructuradas."
-        },
-        { 
-            id: "creative", 
-            name: "Creativo", 
-            icon: <Sparkles className="w-4 h-4" />, 
-            description: "Innovador y original",
-            instructions: "Eres un asistente creativo e innovador. Ofreces soluciones originales, pensamiento lateral y enfoques únicos."
-        },
-        { 
-            id: "technical", 
-            name: "Técnico", 
-            icon: <Brain className="w-4 h-4" />, 
-            description: "Preciso y detallado",
-            instructions: "Eres un asistente técnico y preciso. Proporcionas información detallada, exacta y bien fundamentada."
-        }
-    ];
 
     const handleInputChange = (field: string, value: string) => {
         setAssistantConfig(prev => ({
@@ -123,16 +84,6 @@ export function Settings() {
         }));
     };
 
-    const handlePersonalityChange = (personalityId: string) => {
-        const personality = personalities.find(p => p.id === personalityId);
-        if (personality) {
-            setAssistantConfig(prev => ({
-                ...prev,
-                personality: personalityId,
-                instructions: personality.instructions
-            }));
-        }
-    };
 
     const handleSaveAssistant = async () => {
         try {
@@ -177,9 +128,9 @@ export function Settings() {
                     <AlertCircle className="w-4 h-4 text-red-600" />
                     <AlertDescription className="text-red-800 dark:text-red-200">
                         Error al cargar el asistente: {assistantError.message}
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
+                        <Button
+                            variant="outline"
+                            size="sm"
                             className="ml-3"
                             onClick={handleRefresh}
                         >
@@ -207,7 +158,7 @@ export function Settings() {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Button 
+                    <Button
                         variant="outline"
                         onClick={handleRefresh}
                         disabled={isAssistantLoading}
@@ -215,8 +166,8 @@ export function Settings() {
                         <RefreshCw className={`w-4 h-4 mr-2 ${isAssistantLoading ? 'animate-spin' : ''}`} />
                         Actualizar
                     </Button>
-                    <Button 
-                        onClick={handleSaveAssistant} 
+                    <Button
+                        onClick={handleSaveAssistant}
                         disabled={!hasChanges || updateAssistantMutation.isPending}
                         className="gap-2"
                     >
@@ -257,7 +208,7 @@ export function Settings() {
                     </AlertDescription>
                 </Alert>
             )}
-            
+
             <Tabs defaultValue="assistant" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
                     <TabsTrigger value="assistant" className="gap-2">
@@ -286,59 +237,13 @@ export function Settings() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {/* Preview del asistente */}
-                            <div className="bg-muted/50 rounded-lg p-6 text-center space-y-3">
-                                <Avatar className="w-20 h-20 mx-auto">
-                                    <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${assistantConfig.name}`} />
-                                    <AvatarFallback>{assistantConfig.name?.[0] || 'A'}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <h3 className="font-semibold text-lg">{assistantConfig.name || 'Sin nombre'}</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        {assistantConfig.description || 'Tu asistente personal'}
-                                    </p>
-                                    {assistant && (
-                                        <Badge variant="secondary" className="mt-2">
-                                            ID: {assistant.id}
-                                        </Badge>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Nombre del asistente */}
-                            <div className="space-y-2">
-                                <Label htmlFor="name" className="text-base font-medium">
-                                    Nombre del Asistente *
-                                </Label>
-                                <Input
-                                    id="name"
-                                    value={assistantConfig.name}
-                                    onChange={(e) => handleInputChange('name', e.target.value)}
-                                    placeholder="Ej: Clara, Max, Luna..."
-                                    className="text-lg"
-                                />
-                            </div>
-
-                            {/* Descripción */}
-                            <div className="space-y-2">
-                                <Label htmlFor="description" className="text-base font-medium">
-                                    Descripción
-                                </Label>
-                                <Input
-                                    id="description"
-                                    value={assistantConfig.description}
-                                    onChange={(e) => handleInputChange('description', e.target.value)}
-                                    placeholder="Breve descripción de tu asistente..."
-                                />
-                            </div>
-
                             {/* Modelo */}
                             <div className="space-y-2">
                                 <Label className="text-base font-medium">
                                     Modelo de IA
                                 </Label>
-                                <Select 
-                                    value={assistantConfig.model} 
+                                <Select
+                                    value={assistantConfig.model}
                                     onValueChange={(value) => handleInputChange('model', value)}
                                     disabled={isModelsLoading}
                                 >
@@ -360,81 +265,7 @@ export function Settings() {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Sparkles className="w-5 h-5" />
-                                Personalidad y Comportamiento
-                            </CardTitle>
-                            <CardDescription>
-                                Define cómo se comporta y responde tu asistente
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {/* Personalidad */}
-                            <div className="space-y-3">
-                                <Label className="text-base font-medium">
-                                    Personalidad
-                                </Label>
-                                <RadioGroup 
-                                    value={assistantConfig.personality}
-                                    onValueChange={handlePersonalityChange}
-                                    className="grid grid-cols-1 md:grid-cols-2 gap-3"
-                                >
-                                    {personalities.map((personality) => (
-                                        <Label
-                                            key={personality.id}
-                                            htmlFor={personality.id}
-                                            className="cursor-pointer"
-                                        >
-                                            <Card className={`hover:bg-accent transition-colors ${
-                                                assistantConfig.personality === personality.id ? 'border-primary' : ''
-                                            }`}>
-                                                <CardContent className="flex items-start gap-3 p-4">
-                                                    <RadioGroupItem value={personality.id} id={personality.id} />
-                                                    <div className="flex-1 space-y-1">
-                                                        <div className="flex items-center gap-2">
-                                                            {personality.icon}
-                                                            <span className="font-medium">{personality.name}</span>
-                                                        </div>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {personality.description}
-                                                        </p>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </Label>
-                                    ))}
-                                </RadioGroup>
-                            </div>
 
-                            {/* Instrucciones personalizadas */}
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="instructions" className="text-base font-medium">
-                                        Instrucciones del Sistema
-                                    </Label>
-                                    <Badge variant="secondary" className="gap-1">
-                                        <Zap className="w-3 h-3" />
-                                        Avanzado
-                                    </Badge>
-                                </div>
-                                <Textarea
-                                    id="instructions"
-                                    value={assistantConfig.instructions}
-                                    onChange={(e) => handleInputChange('instructions', e.target.value)}
-                                    rows={6}
-                                    placeholder="Define cómo quieres que se comporte tu asistente..."
-                                    className="resize-none"
-                                />
-                                <p className="text-xs text-muted-foreground flex items-start gap-1">
-                                    <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
-                                    Estas instrucciones definen el comportamiento base del asistente. 
-                                    Sé específico sobre el tono, estilo y tipo de respuestas que esperas.
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
 
                     <RunParametersCard />
 
@@ -442,9 +273,9 @@ export function Settings() {
                     <Alert>
                         <Info className="w-4 h-4" />
                         <AlertDescription>
-                            <strong>Configuración del Asistente vs Conversación:</strong><br/>
-                            • La configuración del asistente (nombre, instrucciones, modelo) se aplica globalmente<br/>
-                            • Los parámetros de conversación (temperatura, tokens) se aplican a cada chat individual<br/>
+                            <strong>Configuración del Asistente vs Conversación:</strong><br />
+                            • La configuración del asistente (nombre, instrucciones, modelo) se aplica globalmente<br />
+                            • Los parámetros de conversación (temperatura, tokens) se aplican a cada chat individual<br />
                             • Ambos tipos de configuración trabajan juntos para personalizar tu experiencia
                         </AlertDescription>
                     </Alert>
@@ -467,9 +298,8 @@ export function Settings() {
                                 <RadioGroup value={theme} onValueChange={setTheme}>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <Label htmlFor="light" className="cursor-pointer">
-                                            <Card className={`hover:bg-accent transition-colors ${
-                                                theme === 'light' ? 'border-primary' : ''
-                                            }`}>
+                                            <Card className={`hover:bg-accent transition-colors ${theme === 'light' ? 'border-primary' : ''
+                                                }`}>
                                                 <CardContent className="flex items-center gap-3 p-4">
                                                     <RadioGroupItem value="light" id="light" />
                                                     <Sun className="w-4 h-4" />
@@ -478,9 +308,8 @@ export function Settings() {
                                             </Card>
                                         </Label>
                                         <Label htmlFor="dark" className="cursor-pointer">
-                                            <Card className={`hover:bg-accent transition-colors ${
-                                                theme === 'dark' ? 'border-primary' : ''
-                                            }`}>
+                                            <Card className={`hover:bg-accent transition-colors ${theme === 'dark' ? 'border-primary' : ''
+                                                }`}>
                                                 <CardContent className="flex items-center gap-3 p-4">
                                                     <RadioGroupItem value="dark" id="dark" />
                                                     <Moon className="w-4 h-4" />
@@ -489,9 +318,8 @@ export function Settings() {
                                             </Card>
                                         </Label>
                                         <Label htmlFor="system" className="cursor-pointer">
-                                            <Card className={`hover:bg-accent transition-colors ${
-                                                theme === 'system' ? 'border-primary' : ''
-                                            }`}>
+                                            <Card className={`hover:bg-accent transition-colors ${theme === 'system' ? 'border-primary' : ''
+                                                }`}>
                                                 <CardContent className="flex items-center gap-3 p-4">
                                                     <RadioGroupItem value="system" id="system" />
                                                     <Laptop className="w-4 h-4" />
@@ -583,14 +411,14 @@ export function Settings() {
                                 <Alert>
                                     <Info className="w-4 h-4" />
                                     <AlertDescription>
-                                        Todos tus datos se almacenan localmente en tu dispositivo. 
+                                        Todos tus datos se almacenan localmente en tu dispositivo.
                                         No compartimos información personal con terceros.
                                     </AlertDescription>
                                 </Alert>
 
                                 <div className="pt-4">
-                                    <Button 
-                                        variant="destructive" 
+                                    <Button
+                                        variant="destructive"
                                         className="gap-2"
                                         onClick={() => {
                                             if (confirm("¿Estás seguro de que quieres borrar todos tus datos?")) {

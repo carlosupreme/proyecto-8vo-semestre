@@ -1,9 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
+import ChatSettings  from '../domains/settings/ChatSettings'
 
 export const Route = createFileRoute('/cuenta')({
-  component: RouteComponent,
+  component: ChatSettings,
 })
-
-function RouteComponent() {
-  return <div>Hello "/cuenta"!</div>
-}
