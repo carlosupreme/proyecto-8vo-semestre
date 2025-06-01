@@ -2,15 +2,27 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Plus, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { type Appointment } from "../types"
-import { ActivityCard } from "./activity-card"
 import { useGetClients } from "../../clients/hooks/useGetClients"
+import { minutesToTimeString, type Appointment } from "../types"
+import { ActivityCard } from "./activity-card"
+import type { Client } from "../../clients/types"
 
+export type Activity = {
+  id: string
+  title: string
+  notes: string
+  startTime: string
+  endTime: string
+  date: string
+  tags: string[]
+  color: string
+  client: Client | undefined
+}
 
 interface ActivityDrawerProps {
   isOpen: boolean
   onClose: () => void
-  activities: Appointment[]
+  appointments: Appointment[]
   selectedDate: Date
   position: "bottom" | "right" | "left"
   isStatic?: boolean // Nueva prop para drawer estático
@@ -20,17 +32,19 @@ interface ActivityDrawerProps {
 export function ActivityDrawer({
   isOpen,
   onClose,
-  activities,
+  appointments,
   selectedDate,
   position = "bottom",
   isStatic = false,
   onCreateActivity,
 }: ActivityDrawerProps) {
-  const [activeCardId, setActiveCardId] = useState<number | null>(null)
+  const [activeCardId, setActiveCardId] = useState<string | null>(null) // Changed to string
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState(0)
   const drawerRef = useRef<HTMLDivElement>(null)
   const dragStartRef = useRef<{ x: number; y: number } | null>(null)
+
+  const { data: clients = [] } = useGetClients()
 
   const handleClose = () => {
     if (!isStatic) {
@@ -38,12 +52,29 @@ export function ActivityDrawer({
     }
   }
 
-  const handleCardClick = (activityId: number) => {
+  const handleCardClick = (activityId: string) => { // Changed to string
     setActiveCardId(activeCardId === activityId ? null : activityId)
   }
 
   const isBottom = position === "bottom"
   const isLeft = position === "left"
+
+  // Convert Appointment to Activity format for ActivityCard
+  const formattedActivities: Activity[] = appointments.map((appointment: Appointment) => {
+    const client = clients.find(client => client.id === appointment.clientId)
+
+    return {
+      id: appointment.id,
+      title: appointment.title,
+      notes: appointment.notes,
+      startTime: minutesToTimeString(appointment.timeRange.startAt),
+      endTime: minutesToTimeString(appointment.timeRange.endAt),
+      date: appointment.date,
+      tags: appointment.tags || [],
+      color: appointment.color || 'bg-clara-sage',
+      client
+    }
+  })
 
   // Touch event handlers para swipe to dismiss (solo para mobile)
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -124,14 +155,10 @@ export function ActivityDrawer({
     const duration = endMinutes - startMinutes
 
     const pixelsPerMinute = 1
-    const top = (startMinutes - 360) * pixelsPerMinute
+    const top = (startMinutes - 360) * pixelsPerMinute // 360 = 6:00 AM
 
-    const height =
-      activeCardId === +activity.id
-        ? "auto"
-        : Math.max(duration * pixelsPerMinute, 40)
-
-    const zIndex = activeCardId === +activity.id ? 50 : 10
+    const height = activeCardId === activity.id ? "auto" : Math.max(duration * pixelsPerMinute, 40)
+    const zIndex = activeCardId === activity.id ? 50 : 10
 
     return {
       top: Math.max(top, 0),
@@ -152,7 +179,11 @@ export function ActivityDrawer({
   }
 
   const timeLabels = generateTimeLabels()
-  const sortedActivities = [...activities].sort((a, b) => a.timeRange.startAt - b.timeRange.startAt)
+
+  // Sort activities by start time
+  const sortedActivities = [...appointments].sort((a, b) =>
+    a.timeRange.startAt - b.timeRange.startAt
+  )
 
   // Calculate transform based on drag offset
   const getDrawerTransform = () => {
@@ -200,12 +231,6 @@ export function ActivityDrawer({
     )
   }
 
-  const { data: clients = [] } = useGetClients()
-
-  const getClientById = (clientId: string) => {
-    return clients.find((client) => client.id === clientId)
-  }
-
   // Render mobile/tablet timeline content
   const renderTimelineContent = () => (
     <div className={getContentClasses()}>
@@ -224,16 +249,19 @@ export function ActivityDrawer({
         )}
 
         <div className={isStatic ? "" : "pt-3"}>
-          <h3 className="text-xl font-bold text-clara-warm-gray-foreground first-letter:capitalize mb-1">
-            {selectedDate.toLocaleDateString("es-ES", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
+          <h3 className="text-xl font-bold text-clara-warm-gray-foreground capitalize mb-1">
+            {(() => {
+              const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
+              const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+              const dayName = dayNames[selectedDate.getDay()]
+              const day = selectedDate.getDate()
+              const month = monthNames[selectedDate.getMonth()]
+              const year = selectedDate.getFullYear()
+              return `${dayName} ${day} de ${month}, ${year}`
+            })()}
           </h3>
           <p className="text-sm text-clara-warm-gray-foreground/70 font-medium">
-            {activities.length} {activities.length === 1 ? "actividad" : "actividades"} programadas
+            {appointments.length} {appointments.length === 1 ? "actividad" : "actividades"} programadas
           </p>
         </div>
 
@@ -249,14 +277,14 @@ export function ActivityDrawer({
 
       {/* Calendar timeline content */}
       <div className="flex-1 overflow-y-auto">
-        {activities.length > 0 ? (
+        {appointments.length > 0 ? (
           <div className="relative border-transparent">
             {/* Time labels and grid lines */}
             <div className="absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-white/50 to-transparent">
               {timeLabels.map(({ time, position }) => (
                 <div
                   key={time}
-                  className="absolute left-0 flex items-center text-sm font-bold text-gray-700"
+                  className="absolute left-0 flex items-center text-sm font-bold text-clara-warm-gray-foreground/80"
                   style={{ top: position }}
                 >
                   <span className="w-16 pr-3 text-right bg-white/70 rounded-r-lg py-1 backdrop-blur-sm">{time}</span>
@@ -269,7 +297,7 @@ export function ActivityDrawer({
               {timeLabels.map(({ position }) => (
                 <div
                   key={position}
-                  className="absolute left-0 right-0 border-t border-gray-200/50"
+                  className="absolute left-0 right-0 border-t border-clara-warm-gray/20"
                   style={{ top: position }}
                 />
               ))}
@@ -277,12 +305,18 @@ export function ActivityDrawer({
 
             {/* Activities */}
             <div className="relative ml-20 mr-6" style={{ height: `${18 * 60}px` }}>
-              {sortedActivities.map((activity) => {
-                const style = getActivityStyle(activity)
-                const isActive = activeCardId === +activity.id
+              {sortedActivities.map((appointment) => {
+                const style = getActivityStyle(appointment)
+                const isActive = activeCardId === appointment.id
+
+                // Find the corresponding formatted activity for ActivityCard
+                const formattedActivity = formattedActivities.find(fa => fa.id === appointment.id)
+
+                if (!formattedActivity) return null
+
                 return (
                   <div
-                    key={activity.id}
+                    key={appointment.id}
                     className={cn("absolute left-2 right-0", isActive && "h-auto min-h-[160px]")}
                     style={{
                       top: `${style.top}px`,
@@ -292,10 +326,10 @@ export function ActivityDrawer({
                     }}
                   >
                     <ActivityCard
-                      activity={{ ...activity, client: getClientById(activity.clientId) }}
+                      activity={formattedActivity}
                       isTimelineView
                       isActive={isActive}
-                      onClick={() => handleCardClick(+activity.id)}
+                      onClick={() => handleCardClick(appointment.id)}
                     />
                   </div>
                 )

@@ -1,11 +1,12 @@
-import { useState } from "react"
-import { ChevronDown, ChevronUp, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { minutesToTimeString, type Appointment } from "../types"
-import type { Client } from "../../clients/types"
+import { ChevronDown, ChevronUp, Clock, CalendarDays, User, Mail, Phone, MapPin, Cake } from "lucide-react"
+import { useState } from "react"
+import type { Activity } from "./activity-drawer"
+import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 interface ActivityCardProps {
-  activity: Appointment & { client: Client | undefined }
+  activity: Activity
   isTimelineView?: boolean
   isActive?: boolean
   onClick?: () => void
@@ -142,45 +143,115 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
               <div className={cn("flex items-center text-xs font-medium", mutedTextColor)}>
                 <Clock className="mr-2 h-3 w-3 flex-shrink-0" />
                 <span className="truncate">
-                  {minutesToTimeString(activity.timeRange.startAt)} - {minutesToTimeString(activity.timeRange.endAt)}
+                  {activity.startTime} - {activity.endTime}
                 </span>
               </div>
             )}
           </div>
 
           {isActive && (
-            <div className="mt-4 space-y-3 border-t border-white/30 pt-4">
+            <div className="mt-4 space-y-4 border-t border-white/30 pt-4">
+              {/* Time */}
               <div className={cn("flex items-center text-sm font-semibold", mutedTextColor)}>
                 <Clock className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span>
-                  {minutesToTimeString(activity.timeRange.startAt)} - {minutesToTimeString(activity.timeRange.endAt)}
+                  {activity.startTime} - {activity.endTime}
                 </span>
               </div>
 
+              {/* Date */}
+              <div className={cn("flex items-center text-sm", mutedTextColor)}>
+                <CalendarDays className="mr-2 h-4 w-4 flex-shrink-0" />
+                <span className={cn("font-semibold", textColor)}>{format(activity.date, "PPP", { locale: es })}</span>
+              </div>
+
+              {/* Full Title */}
               <p className={cn("text-sm leading-relaxed font-medium", textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/95" : "text-clara-warm-gray-foreground")}>
                 {activity.title}
               </p>
 
-              {activity.client && (
+              {/* Activity Notes */}
+              {activity.notes && (
                 <div className="text-sm">
-                  <span className={cn("font-bold", mutedTextColor)}>Cliente: </span>
-                  <span className={cn("font-semibold", textColor)}>{activity.client?.name}</span>
+                  <h5 className={cn("font-bold mb-1 text-xs uppercase tracking-wider", mutedTextColor)}>Notes</h5>
+                  <p className={cn("leading-relaxed whitespace-pre-wrap", textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/90" : "text-clara-warm-gray-foreground/90")}>
+                    {activity.notes}
+                  </p>
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-2">
-                {activity.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className={cn(
-                      "inline-flex items-center rounded-full px-3 py-1 text-xs font-bold transition-all duration-200",
-                      getTagColor(tag, cardBgColor, isActive),
+              {/* Client Section */}
+              {activity.client && (
+                <div className="space-y-2 pt-3 border-t border-white/20 mt-3">
+                  <div className="flex items-center">
+                    {activity.client.photo ? (
+                      <img src={activity.client.photo} alt={activity.client.name} className="w-10 h-10 rounded-full mr-3 object-cover border border-white/30 shadow-sm" />
+                    ) : (
+                      <div className={cn("w-10 h-10 rounded-full mr-3 flex items-center justify-center shadow-sm", getBackgroundColor(activity.color) === "bg-clara-warm-gray/40" ? "bg-clara-warm-gray/60" : "bg-white/20", textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/80" : "text-clara-warm-gray-foreground/70")}>
+                        <User className="h-5 w-5" />
+                      </div>
                     )}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+                    <div>
+                      <h5 className={cn("font-bold text-xs uppercase tracking-wider", mutedTextColor)}>Cliente</h5>
+                      <p className={cn("font-semibold", textColor)}>{activity.client.name}</p>
+                    </div>
+                  </div>
+
+                  {activity.client.email && (
+                    <div className={cn("flex items-center text-sm", mutedTextColor)}>
+                      <Mail className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className={cn(textColor)}>{activity.client.email}</span>
+                    </div>
+                  )}
+
+                  {activity.client.phoneNumber && (
+                    <div className={cn("flex items-center text-sm", mutedTextColor)}>
+                      <Phone className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className={cn(textColor)}>{activity.client.phoneNumber.substring(0, 13)}</span>
+                    </div>
+                  )}
+
+                  {activity.client.address && (
+                    <div className={cn("flex items-start text-sm", mutedTextColor)}>
+                      <MapPin className="mr-2 h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <span className={cn(textColor, "whitespace-pre-wrap")}>{activity.client.address}</span>
+                    </div>
+                  )}
+
+                  {activity.client.birthdate && (
+                    <div className={cn("flex items-center text-sm", mutedTextColor)}>
+                      <Cake className="mr-2 h-4 w-4 flex-shrink-0" />
+                      <span className={cn(textColor)}>{activity.client.birthdate}</span>
+                    </div>
+                  )}
+
+                  {activity.client.notes && (
+                    <div className="text-sm pt-1">
+                      <h6 className={cn("font-bold text-xs mb-0.5 uppercase tracking-wider", mutedTextColor)}>Client Notes</h6>
+                      <p className={cn("leading-relaxed whitespace-pre-wrap text-xs", textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/80" : "text-clara-warm-gray-foreground/80")}>
+                        {activity.client.notes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tags */}
+              {activity.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-3 border-t border-white/20 mt-3">
+                  {activity.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className={cn(
+                        "inline-flex items-center rounded-full px-3 py-1 text-xs font-bold transition-all duration-200",
+                        getTagColor(tag, cardBgColor, isActive),
+                      )}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -222,7 +293,7 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
             <div className={cn("flex items-center text-sm font-medium mt-1", mutedTextColor)}>
               <Clock className="mr-2 h-4 w-4" />
               <span>
-                {minutesToTimeString(activity.timeRange.startAt)} - {minutesToTimeString(activity.timeRange.endAt)}
+                {activity.startTime} - {activity.endTime}
               </span>
             </div>
           </div>

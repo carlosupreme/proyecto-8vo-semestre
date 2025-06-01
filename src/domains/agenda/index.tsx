@@ -120,7 +120,7 @@ export default function CalendarPage() {
         <ActivityDrawer
           isOpen={true}
           onClose={() => { }} // No se usa en modo estático
-          activities={formattedAppointments}
+          appointments={formattedAppointments}
           selectedDate={selectedDate}
           position="left"
           isStatic={true}
@@ -285,7 +285,7 @@ export default function CalendarPage() {
         <ActivityDrawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
-          activities={formattedAppointments}
+          appointments={formattedAppointments}
           selectedDate={selectedDate}
           position="bottom"
           onCreateActivity={handleCreateActivity}
