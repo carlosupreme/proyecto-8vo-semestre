@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { ChevronDown, ChevronUp, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Activity } from ".."
+import { minutesToTimeString, type Appointment } from "../types"
+import type { Client } from "../../clients/types"
 
 interface ActivityCardProps {
-  activity: Activity
+  activity: Appointment & { client: Client | undefined }
   isTimelineView?: boolean
   isActive?: boolean
   onClick?: () => void
@@ -21,155 +22,158 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
     }
   }
 
-  // Nueva paleta de colores pasteles
+  // Nueva paleta de colores pasteles usando Clara theme
   const getBackgroundColor = (color: string) => {
     const colorMap: { [key: string]: string } = {
-      "bg-blue-500": "bg-[#d4e2d4]", // Verde pastel basado en #899387
-      "bg-green-500": "bg-[#899387]", // Color principal verde
-      "bg-purple-500": "bg-[#e6d5d0]", // Rosa pastel basado en #ae8276
-      "bg-red-500": "bg-[#ae8276]", // Color principal terracota
-      "bg-yellow-500": "bg-[#f5f1e8]", // Amarillo pastel muy suave
-      "bg-indigo-500": "bg-[#e8e8e8]", // Gris claro
-      "bg-pink-500": "bg-[#f0e6e6]", // Rosa pastel suave
-      "bg-teal-500": "bg-[#a5a5a0]", // Gris verdoso
-      "bg-orange-500": "bg-[#f2e8d5]", // Amarillo cálido pastel
-      "bg-cyan-500": "bg-[#d9d9d9]", // Gris medio
-      "bg-lime-500": "bg-[#e8f0e8]", // Verde muy claro
-      "bg-emerald-500": "bg-[#9ca598]", // Verde grisáceo
-      "bg-violet-500": "bg-[#ede8e8]", // Rosa grisáceo muy suave
-      "bg-fuchsia-500": "bg-[#e8d8d8]", // Rosa pastel
-      "bg-rose-500": "bg-[#f0d8d8]", // Rosa suave
-      "bg-sky-500": "bg-[#f8f8f8]", // Casi blanco
+      "bg-blue-500": "bg-clara-sage-200", // Verde pastel claro
+      "bg-green-500": "bg-clara-sage", // Color principal verde
+      "bg-purple-500": "bg-clara-terracotta-200", // Rosa pastel basado en terracotta
+      "bg-red-500": "bg-clara-terracotta", // Color principal terracotta
+      "bg-yellow-500": "bg-clara-beige/70", // Beige suave
+      "bg-indigo-500": "bg-clara-warm-gray", // Gris claro
+      "bg-pink-500": "bg-clara-terracotta-100", // Rosa pastel suave
+      "bg-teal-500": "bg-clara-sage-300", // Verde grisáceo
+      "bg-orange-500": "bg-clara-beige", // Beige cálido
+      "bg-cyan-500": "bg-clara-warm-gray/80", // Gris medio
+      "bg-lime-500": "bg-clara-sage-100", // Verde muy claro
+      "bg-emerald-500": "bg-clara-sage-400", // Verde grisáceo
+      "bg-violet-500": "bg-clara-terracotta-100", // Rosa grisáceo muy suave
+      "bg-fuchsia-500": "bg-clara-terracotta-200", // Rosa pastel
+      "bg-rose-500": "bg-clara-terracotta-300", // Rosa suave
+      "bg-sky-500": "bg-clara-warm-gray/60", // Casi blanco
     }
-    return colorMap[color] || "bg-[#f0f0f0]"
+    return colorMap[color] || "bg-clara-warm-gray/40"
   }
 
   // Colores más saturados para el estado activo
   const getActiveBackgroundColor = (color: string) => {
     const colorMap: { [key: string]: string } = {
-      "bg-blue-500": "bg-[#c2d4c2]", // Verde más intenso
-      "bg-green-500": "bg-[#7a8577]", // Verde principal más oscuro
-      "bg-purple-500": "bg-[#d4c0ba]", // Rosa más intenso
-      "bg-red-500": "bg-[#9e7468]", // Terracota más oscuro
-      "bg-yellow-500": "bg-[#ebe4d5]", // Amarillo más cálido
-      "bg-indigo-500": "bg-[#d8d8d8]", // Gris más intenso
-      "bg-pink-500": "bg-[#e5d5d5]", // Rosa más visible
-      "bg-teal-500": "bg-[#959590]", // Gris verdoso más oscuro
-      "bg-orange-500": "bg-[#e8d8c2]", // Amarillo más cálido
-      "bg-cyan-500": "bg-[#c8c8c8]", // Gris más oscuro
-      "bg-lime-500": "bg-[#d8e5d8]", // Verde más visible
-      "bg-emerald-500": "bg-[#8a9585]", // Verde más intenso
-      "bg-violet-500": "bg-[#ddd5d5]", // Rosa más definido
-      "bg-fuchsia-500": "bg-[#d8c5c5]", // Rosa más intenso
-      "bg-rose-500": "bg-[#e5c5c5]", // Rosa más cálido
-      "bg-sky-500": "bg-[#e8e8e8]", // Gris muy claro
+      "bg-blue-500": "bg-clara-sage-300", // Verde más intenso
+      "bg-green-500": "bg-clara-sage-600", // Verde principal más oscuro
+      "bg-purple-500": "bg-clara-terracotta-300", // Terracotta más intenso
+      "bg-red-500": "bg-clara-terracotta-600", // Terracotta más oscuro
+      "bg-yellow-500": "bg-clara-beige/90", // Beige más cálido
+      "bg-indigo-500": "bg-clara-warm-gray", // Gris más intenso
+      "bg-pink-500": "bg-clara-terracotta-200", // Rosa más visible
+      "bg-teal-500": "bg-clara-sage-400", // Verde más oscuro
+      "bg-orange-500": "bg-clara-beige", // Beige más cálido
+      "bg-cyan-500": "bg-clara-warm-gray", // Gris más oscuro
+      "bg-lime-500": "bg-clara-sage-200", // Verde más visible
+      "bg-emerald-500": "bg-clara-sage-500", // Verde más intenso
+      "bg-violet-500": "bg-clara-terracotta-200", // Rosa más definido
+      "bg-fuchsia-500": "bg-clara-terracotta-300", // Rosa más intenso
+      "bg-rose-500": "bg-clara-terracotta-400", // Rosa más cálido
+      "bg-sky-500": "bg-clara-warm-gray/90", // Gris muy claro
     }
-    return colorMap[color] || "bg-[#e0e0e0]"
+    return colorMap[color] || "bg-clara-warm-gray"
   }
 
-  // Función para determinar si el texto debe ser claro u oscuro
+  // Función para determinar si el texto debe ser claro u oscuro basado en Clara theme
   const getTextColor = (backgroundColor: string, isActive: boolean = false) => {
-    // Colores más oscuros que necesitan texto claro
+    // Colores Clara que necesitan texto claro (foreground ya definido como blanco)
     const darkBackgrounds = [
-      "bg-[#899387]", "bg-[#ae8276]", "bg-[#7a8577]", "bg-[#9e7468]",
-      "bg-[#a5a5a0]", "bg-[#9ca598]", "bg-[#959590]", "bg-[#8a9585]"
+      "bg-clara-sage", "bg-clara-terracotta", "bg-clara-forest", "bg-clara-beige",
+      "bg-clara-sage-600", "bg-clara-sage-500", "bg-clara-sage-400",
+      "bg-clara-terracotta-600", "bg-clara-terracotta-500", "bg-clara-terracotta-400"
     ]
 
     const currentBg = isActive ? getActiveBackgroundColor(backgroundColor) : getBackgroundColor(backgroundColor)
 
-    if (darkBackgrounds.some(dark => currentBg.includes(dark.slice(4, -1)))) {
-      return "text-white"
+    if (darkBackgrounds.some(dark => currentBg.includes(dark.replace("bg-", "")))) {
+      return "text-clara-sage-foreground" // Blanco
     }
-    return "text-gray-800"
+    return "text-clara-warm-gray-foreground" // Texto oscuro
   }
 
-  // Generar colores para tags adaptados al fondo
+  // Generar colores para tags adaptados al fondo Clara theme
   const getTagColor = (tag: string, cardBgColor: string, isCardActive: boolean = false) => {
-    const isLightText = getTextColor(cardBgColor, isCardActive) === "text-white"
+    const isLightText = getTextColor(cardBgColor, isCardActive) === "text-clara-sage-foreground"
 
     const lightCardColors = {
-      Work: "bg-white/20 text-white border border-white/30",
-      Deadline: "bg-white/20 text-white border border-white/30",
-      Education: "bg-white/20 text-white border border-white/30",
-      Design: "bg-white/20 text-white border border-white/30",
-      Sports: "bg-white/20 text-white border border-white/30",
-      Health: "bg-white/20 text-white border border-white/30",
-      Social: "bg-white/20 text-white border border-white/30",
-      Food: "bg-white/20 text-white border border-white/30",
-      Meeting: "bg-white/20 text-white border border-white/30",
-      Personal: "bg-white/20 text-white border border-white/30",
+      Work: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Deadline: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Education: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Design: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Sports: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Health: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Social: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Food: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Meeting: "bg-white/20 text-clara-sage-foreground border border-white/30",
+      Personal: "bg-white/20 text-clara-sage-foreground border border-white/30",
     }
 
     const darkCardColors = {
-      Work: "bg-gray-800/10 text-gray-700 border border-gray-300/50",
-      Deadline: "bg-red-100/80 text-red-700 border border-red-200",
-      Education: "bg-blue-100/80 text-blue-700 border border-blue-200",
-      Design: "bg-purple-100/80 text-purple-700 border border-purple-200",
-      Sports: "bg-green-100/80 text-green-700 border border-green-200",
-      Health: "bg-emerald-100/80 text-emerald-700 border border-emerald-200",
-      Social: "bg-violet-100/80 text-violet-700 border border-violet-200",
-      Food: "bg-amber-100/80 text-amber-700 border border-amber-200",
-      Meeting: "bg-sky-100/80 text-sky-700 border border-sky-200",
-      Personal: "bg-rose-100/80 text-rose-700 border border-rose-200",
+      Work: "bg-clara-warm-gray-foreground/10 text-clara-warm-gray-foreground border border-clara-warm-gray-foreground/20",
+      Deadline: "bg-clara-terracotta-100 text-clara-terracotta-700 border border-clara-terracotta-200",
+      Education: "bg-clara-sage-100 text-clara-sage-700 border border-clara-sage-200",
+      Design: "bg-clara-beige/50 text-clara-warm-gray-foreground border border-clara-beige",
+      Sports: "bg-clara-sage-200 text-clara-sage-800 border border-clara-sage-300",
+      Health: "bg-clara-sage-100 text-clara-sage-700 border border-clara-sage-200",
+      Social: "bg-clara-terracotta-100 text-clara-terracotta-700 border border-clara-terracotta-200",
+      Food: "bg-clara-beige text-clara-warm-gray-foreground border border-clara-beige",
+      Meeting: "bg-clara-warm-gray text-clara-warm-gray-foreground border border-clara-warm-gray",
+      Personal: "bg-clara-terracotta-200 text-clara-terracotta-800 border border-clara-terracotta-300",
     }
 
     const colors = isLightText ? lightCardColors : darkCardColors
-    return colors[tag as keyof typeof colors] || (isLightText ? "bg-white/20 text-white border border-white/30" : "bg-gray-100/80 text-gray-700 border border-gray-300/50")
+    return colors[tag as keyof typeof colors] || (isLightText ? "bg-white/20 text-clara-sage-foreground border border-white/30" : "bg-clara-warm-gray/40 text-clara-warm-gray-foreground border border-clara-warm-gray/60")
   }
 
   if (isTimelineView) {
     const cardBgColor = activity.color
     const textColor = getTextColor(cardBgColor, isActive)
-    const mutedTextColor = textColor === "text-white" ? "text-white/80" : "text-gray-600"
+    const mutedTextColor = textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/80" : "text-clara-warm-gray-foreground/60"
 
     return (
       <div
         className={cn(
-          "h-full cursor-pointer overflow-hidden rounded-2xl transition-all duration-200 hover:shadow-md",
+          "h-full cursor-pointer overflow-hidden rounded-3xl transition-all duration-300 hover:shadow-lg group",
           isActive ? getActiveBackgroundColor(activity.color) : getBackgroundColor(activity.color),
-          isActive ? "shadow-lg scale-105" : "shadow-sm",
-          "border border-gray-200/30",
-          isActive && "h-auto",
+          isActive ? "shadow-xl scale-105 z-50" : "shadow-lg hover:scale-102",
+          "border border-white/40 backdrop-blur-sm",
+          isActive && "h-auto ring-2 ring-white/20",
         )}
         onClick={toggleExpanded}
       >
-        <div className={cn("flex flex-col p-3", isActive ? "h-auto" : "h-full")}>
+        <div className={cn("flex flex-col p-4", isActive ? "h-auto" : "h-full")}>
           <div className={cn("min-h-0", isActive ? "" : "flex-1")}>
-            <h4 className={cn("mb-1 truncate text-sm font-semibold leading-tight", textColor)}>{activity.title}</h4>
+            <h4 className={cn("mb-2 text-sm font-bold leading-tight", textColor, !isActive && "truncate")}>{activity.title}</h4>
             {!isActive && (
-              <div className={cn("flex items-center text-xs", mutedTextColor)}>
-                <Clock className="mr-1 h-3 w-3 flex-shrink-0" />
+              <div className={cn("flex items-center text-xs font-medium", mutedTextColor)}>
+                <Clock className="mr-2 h-3 w-3 flex-shrink-0" />
                 <span className="truncate">
-                  {activity.startTime} - {activity.endTime}
+                  {minutesToTimeString(activity.timeRange.startAt)} - {minutesToTimeString(activity.timeRange.endAt)}
                 </span>
               </div>
             )}
           </div>
 
           {isActive && (
-            <div className="mt-2 space-y-2 border-t border-white/20 pt-2">
-              <div className={cn("flex items-center text-xs", mutedTextColor)}>
-                <Clock className="mr-1 h-3 w-3 flex-shrink-0" />
+            <div className="mt-4 space-y-3 border-t border-white/30 pt-4">
+              <div className={cn("flex items-center text-sm font-semibold", mutedTextColor)}>
+                <Clock className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span>
-                  {activity.startTime} - {activity.endTime}
+                  {minutesToTimeString(activity.timeRange.startAt)} - {minutesToTimeString(activity.timeRange.endAt)}
                 </span>
               </div>
 
-              <p className={cn("text-xs leading-relaxed", textColor === "text-white" ? "text-white/90" : "text-gray-700")}>
+              <p className={cn("text-sm leading-relaxed font-medium", textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/95" : "text-clara-warm-gray-foreground")}>
                 {activity.title}
               </p>
 
-              <div className="text-xs">
-                <span className={cn("font-medium", mutedTextColor)}></span>
-                <span className={cn("ml-1", textColor)}>{activity.client?.name}</span>
-              </div>
+              {activity.client && (
+                <div className="text-sm">
+                  <span className={cn("font-bold", mutedTextColor)}>Cliente: </span>
+                  <span className={cn("font-semibold", textColor)}>{activity.client?.name}</span>
+                </div>
+              )}
 
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-2">
                 {activity.tags.map((tag) => (
                   <span
                     key={tag}
                     className={cn(
-                      "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                      "inline-flex items-center rounded-full px-3 py-1 text-xs font-bold transition-all duration-200",
                       getTagColor(tag, cardBgColor, isActive),
                     )}
                   >
@@ -180,9 +184,14 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
             </div>
           )}
 
-          <div className="mt-1 flex justify-center">
-            <button className={cn("transition-colors", textColor === "text-white" ? "text-white/60 hover:text-white/80" : "text-gray-400 hover:text-gray-600")}>
-              {isActive ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          <div className="mt-3 flex justify-center">
+            <button className={cn(
+              "p-2 rounded-full transition-all duration-200 hover:scale-110",
+              textColor === "text-clara-sage-foreground"
+                ? "text-clara-sage-foreground/70 hover:text-clara-sage-foreground/90 hover:bg-white/10"
+                : "text-clara-warm-gray-foreground/70 hover:text-clara-warm-gray-foreground hover:bg-clara-warm-gray/20"
+            )}>
+              {isActive ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
           </div>
         </div>
@@ -193,54 +202,61 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
   // Vista de tarjeta original (no timeline)
   const cardBgColor = activity.color
   const textColor = getTextColor(cardBgColor, false)
-  const mutedTextColor = textColor === "text-white" ? "text-white/80" : "text-gray-500"
+  const mutedTextColor = textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/80" : "text-clara-warm-gray-foreground/60"
 
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl border border-gray-200/30 transition-all duration-300",
+        "overflow-hidden rounded-3xl border border-white/40 transition-all duration-300 backdrop-blur-sm group",
         getBackgroundColor(activity.color),
-        expanded ? "shadow-md" : "shadow-sm",
+        expanded ? "shadow-xl scale-102" : "shadow-lg hover:shadow-xl hover:scale-101",
       )}
     >
-      <div className="flex cursor-pointer items-center justify-between p-4" onClick={toggleExpanded}>
-        <div className="flex items-center gap-3">
-          <div className={cn("h-4 w-4 rounded-full border-2",
-            textColor === "text-white" ? "border-white/40 bg-white/20" : "border-gray-400/40 bg-gray-400/20"
+      <div className="flex cursor-pointer items-center justify-between p-5" onClick={toggleExpanded}>
+        <div className="flex items-center gap-4">
+          <div className={cn("h-5 w-5 rounded-full border-2 shadow-sm",
+            textColor === "text-clara-sage-foreground" ? "border-clara-sage-foreground/50 bg-clara-sage-foreground/30" : "border-clara-warm-gray-foreground/50 bg-clara-warm-gray-foreground/30"
           )} />
           <div>
-            <h4 className={cn("font-medium", textColor)}>{activity.title}</h4>
-            <div className={cn("flex items-center text-sm", mutedTextColor)}>
-              <Clock className="mr-1 h-3 w-3" />
+            <h4 className={cn("font-bold text-base", textColor)}>{activity.title}</h4>
+            <div className={cn("flex items-center text-sm font-medium mt-1", mutedTextColor)}>
+              <Clock className="mr-2 h-4 w-4" />
               <span>
-                {activity.startTime} - {activity.endTime}
+                {minutesToTimeString(activity.timeRange.startAt)} - {minutesToTimeString(activity.timeRange.endAt)}
               </span>
             </div>
           </div>
         </div>
 
-        <button className={cn("transition-colors", textColor === "text-white" ? "text-white/70 hover:text-white/90" : "text-gray-500 hover:text-gray-700")}>
+        <button className={cn(
+          "p-2 rounded-full transition-all duration-200 hover:scale-110",
+          textColor === "text-clara-sage-foreground"
+            ? "text-clara-sage-foreground/70 hover:text-clara-sage-foreground/90 hover:bg-white/10"
+            : "text-clara-warm-gray-foreground/70 hover:text-clara-warm-gray-foreground hover:bg-clara-warm-gray/20"
+        )}>
           {expanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
         </button>
       </div>
 
       {expanded && (
-        <div className="rounded-b-2xl border-t border-white/20 bg-black/5 p-4">
-          <div className="mb-3">
-            <p className={cn("text-sm", textColor === "text-white" ? "text-white/90" : "text-gray-700")}>{activity.title}</p>
+        <div className="rounded-b-3xl border-t border-white/30 bg-white/10 p-5 backdrop-blur-sm">
+          <div className="mb-4">
+            <p className={cn("text-sm font-medium leading-relaxed", textColor === "text-clara-sage-foreground" ? "text-clara-sage-foreground/95" : "text-clara-warm-gray-foreground")}>{activity.title}</p>
           </div>
 
-          <div className="mb-2">
-            <span className={cn("text-xs font-medium", mutedTextColor)}>Cliente:</span>
-            <span className={cn("ml-2 text-sm", textColor)}>{activity.client?.name}</span>
-          </div>
+          {activity.client && (
+            <div className="mb-4">
+              <span className={cn("text-sm font-bold", mutedTextColor)}>Cliente: </span>
+              <span className={cn("text-sm font-semibold", textColor)}>{activity.client?.name}</span>
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-2">
             {activity.tags.map((tag) => (
               <span
                 key={tag}
                 className={cn(
-                  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                  "inline-flex items-center rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200",
                   getTagColor(tag, cardBgColor, false),
                 )}
               >

@@ -9,22 +9,7 @@ import { CalendarView } from "./components/calendar-view"
 import { CreateActivityDialog } from "./components/create-activity-dialog"
 import WelcomeCard from "./components/welcome-card"
 import { useDayAppointments } from "./hooks/use-appointments"
-import type { Appointment } from "./types"
-import { minutesToTimeString } from "./types"
-import type { Client } from "../clients/types"
-import { useGetClients } from "../clients/hooks/useGetClients"
-
-// Activity type expected by UI components
-export type Activity = {
-  id: number
-  title: string
-  startTime: string
-  endTime: string
-  date: string
-  tags: string[]
-  color: string
-  client: Client | undefined
-}
+import { minutesToTimeString, type Appointment } from "./types"
 
 export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
@@ -60,27 +45,12 @@ export default function CalendarPage() {
 
   }
 
-  const { data: clients } = useGetClients()
-
   const isEnabled = useMemo(() => user?.assistantConfig.enabled || false, [user])
 
   // Format appointments to match the UI component requirements
-  const formattedAppointments: Activity[] = useMemo(() => {
-    return appointments.map((appointment: Appointment) => {
-      const client = clients?.find(client => client.id === appointment.clientId)
-
-      return {
-        id: +appointment.id,
-        title: appointment.notes,
-        startTime: minutesToTimeString(appointment.timeRange.startAt),
-        endTime: minutesToTimeString(appointment.timeRange.endAt),
-        date: appointment.date,
-        tags: appointment.tags || [],
-        color: appointment.color || 'bg-sky-500',
-        client
-      }
-    })
-  }, [appointments, clients])
+  const formattedAppointments: Appointment[] = useMemo(() => {
+    return appointments;
+  }, [appointments])
 
   // Get today's date in ISO format
   const today = new Date().toISOString().split("T")[0]
@@ -144,7 +114,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-2 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-2 overflow-hidden">
       {/* Desktop Static ActivityDrawer - Left Side */}
       {isDesktop && (
         <ActivityDrawer
@@ -161,10 +131,10 @@ export default function CalendarPage() {
       {/* Main Content */}
       <div className="pb-2">
         {/* Content Grid */}
-        <div className="max-w-full mx-auto px-3 py-1">
-          <div className={`${isDesktop ? "grid grid-cols-12 gap-6 h-screen pl-96" : "space-y-4"}`}>
+        <div className="max-w-full mx-auto px-4 py-2 sm:px-6 lg:px-8">
+          <div className={`${isDesktop ? "grid grid-cols-12 gap-6 h-screen pl-96" : "space-y-6"}`}>
             {/* Main Content - Left Side */}
-            <div className={`${isDesktop ? "col-span-9" : "w-full"} space-y-4`}>
+            <div className={`${isDesktop ? "col-span-9" : "w-full"} space-y-6`}>
               <main className="">
                 <WelcomeCard
                   isEnabled={isEnabled}
@@ -174,23 +144,26 @@ export default function CalendarPage() {
               {/* Today's Summary Card */}
               <div
                 ref={summaryCardRef}
-                className="bg-[#ae8276] rounded-2xl p-4 shadow-md relative"
+                className="bg-clara-terracotta rounded-3xl p-6 shadow-lg border border-white/20 backdrop-blur-sm relative transition-all duration-300 hover:shadow-xl"
                 style={!isDesktop ? getCardTransform(0) : {}}
               >
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-white/20 p-3 rounded-2xl">
+                      <div className="w-6 h-6 bg-white/30 rounded-full"></div>
+                    </div>
                     <div>
-                      <h3 className="font-semibold text-white">CLARA ha agendado</h3>
-                      <p className="text-sm text-white">{todayAppointmentsCount} actividades</p>
+                      <h3 className="font-bold text-clara-terracotta-foreground text-lg">CLARA ha agendado</h3>
+                      <p className="text-clara-terracotta-foreground/90 text-sm font-medium">{todayAppointmentsCount} actividades para hoy</p>
                     </div>
                   </div>
                   {!isDesktop && (
                     <Button
                       size="sm"
-                      className="bg-[#272624] hover:bg-[#272624] text-white rounded-full px-4"
+                      className="bg-white/20 hover:bg-white/30 text-clara-terracotta-foreground rounded-full px-6 py-2 backdrop-blur-sm border border-white/30 transition-all duration-200"
                       onClick={handleViewActivities}
                     >
-                      Ver
+                      Ver detalles
                     </Button>
                   )}
                 </div>
@@ -199,7 +172,7 @@ export default function CalendarPage() {
               {/* Calendar Card */}
               <div
                 ref={calendarCardRef}
-                className="bg-[#899387] rounded-3xl p-4 shadow-sm relative"
+                className="bg-clara-sage rounded-3xl p-6 shadow-lg border border-white/20 backdrop-blur-sm relative transition-all duration-300 hover:shadow-xl"
                 style={!isDesktop ? getCardTransform(1) : {}}
               >
                 <CalendarView
@@ -207,12 +180,12 @@ export default function CalendarPage() {
                   onSelectDate={handleDateSelect}
                   activities={formattedAppointments}
                 />
-                <div className="mt-4">
+                <div className="mt-6">
                   <Button
                     onClick={handleCreateActivity}
-                    className="w-full bg-[#343b34] hover:bg-black text-white rounded-2xl h-12 flex items-center justify-center space-x-2"
+                    className="w-full bg-clara-forest hover:bg-clara-forest/90 text-clara-forest-foreground rounded-2xl h-14 flex items-center justify-center space-x-3 font-semibold text-base transition-all duration-200 shadow-lg"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-6 h-6" />
                     <span>Crear Evento</span>
                   </Button>
                 </div>
@@ -222,28 +195,33 @@ export default function CalendarPage() {
               {!isDesktop && formattedAppointments.length > 0 && (
                 <div
                   ref={activitiesCardRef}
-                  className="bg-[#d7d4d5] rounded-3xl p-6 shadow-sm border border-gray-100 relative"
+                  className="bg-clara-warm-gray rounded-3xl p-6 shadow-lg border border-white/20 backdrop-blur-sm relative transition-all duration-300 hover:shadow-xl"
                   style={getCardTransform(2)}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-[261f0f]">
-                      {selectedDate.toLocaleDateString("en-US", {
-                        weekday: "long",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </h3>
-                    <span className="text-sm text-[261f0f]">{formattedAppointments.length} eventos</span>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="font-bold text-clara-warm-gray-foreground text-lg">
+                        {selectedDate.toLocaleDateString("es-ES", {
+                          weekday: "long",
+                          day: "numeric",
+                          month: "long",
+                        })}
+                      </h3>
+                      <span className="text-sm text-clara-warm-gray-foreground/70 font-medium">{formattedAppointments.length} {formattedAppointments.length === 1 ? 'evento' : 'eventos'}</span>
+                    </div>
+                    <div className="bg-clara-sage p-3 rounded-2xl">
+                      <div className="w-6 h-6 bg-white/30 rounded-full"></div>
+                    </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {formattedAppointments.slice(0, 3).map((activity) => (
-                      <div key={activity.id} className="flex items-center space-x-3 p-0 bg-[#d7d4d5] rounded-2xl">
-                        <div className={`w-3 h-3 rounded-full ${activity.color}`}></div>
+                      <div key={activity.id} className="flex items-center space-x-4 p-4 bg-white/30 rounded-2xl backdrop-blur-sm transition-all duration-200 hover:bg-white/40">
+                        <div className={`w-4 h-4 rounded-full ${activity.color} shadow-sm`}></div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-[261f0f] truncate">{activity.title}</p>
-                          <p className="text-sm text-[261f0f]">
-                            {activity.startTime} - {activity.endTime}
+                          <p className="font-semibold text-clara-warm-gray-foreground truncate text-sm">{activity.title}</p>
+                          <p className="text-sm text-clara-warm-gray-foreground/80 font-medium">
+                            {minutesToTimeString(activity.timeRange.startAt)} - {minutesToTimeString(activity.timeRange.endAt)}
                           </p>
                         </div>
                       </div>
@@ -252,7 +230,7 @@ export default function CalendarPage() {
                     {formattedAppointments.length > 3 && (
                       <Button
                         variant="ghost"
-                        className="w-full text-[261f0f] hover:bg-blue-50 rounded-2xl"
+                        className="w-full text-clara-warm-gray-foreground hover:bg-white/40 rounded-2xl font-semibold transition-all duration-200 py-3"
                         onClick={handleViewActivities}
                       >
                         Ver {formattedAppointments.length - 3} eventos más
@@ -265,15 +243,15 @@ export default function CalendarPage() {
 
             {/* Desktop Center Column - Quick Actions */}
             {isDesktop && (
-              <div className="col-span-3 space-y-4 mt-2">
-                <div className="bg-[#899387] rounded-3xl p-6 shadow-sm border border-gray-100">
-                  <h3 className="font-semibold text-gray-200 mb-4">Atajos</h3>
-                  <div className="space-y-3">
+              <div className="col-span-3 space-y-6 mt-2">
+                <div className="bg-clara-sage rounded-3xl p-6 shadow-lg border border-white/20 backdrop-blur-sm">
+                  <h3 className="font-bold text-clara-sage-foreground mb-6 text-lg">Acciones rápidas</h3>
+                  <div className="space-y-4">
                     <Button
                       onClick={handleCreateActivity}
-                      className="w-full bg-[#343b34] hover:bg-black text-white rounded-2xl h-12"
+                      className="w-full bg-clara-forest hover:bg-clara-forest/90 text-clara-forest-foreground rounded-2xl h-14 font-semibold text-base transition-all duration-200 shadow-lg"
                     >
-                      <Plus className="w-5 h-5 mr-2" />
+                      <Plus className="w-6 h-6 mr-3" />
                       Nuevo Evento
                     </Button>
                   </div>
@@ -281,15 +259,18 @@ export default function CalendarPage() {
 
                 {/* Selected Date Summary */}
                 {formattedAppointments.length > 0 && (
-                  <div className="bg-[#c9b096] rounded-3xl p-4 shadow-sm border border-gray-100">
+                  <div className="bg-clara-beige rounded-3xl p-6 shadow-lg border border-white/20 backdrop-blur-sm">
                     <div className="text-center">
-                      <h3 className="font-semibold text-gray-100 text-sm">
-                        {selectedDate.toLocaleDateString("en-US", {
-                          month: "short",
+                      <div className="bg-white/20 p-3 rounded-2xl mb-4 mx-auto w-fit">
+                        <div className="w-6 h-6 bg-white/30 rounded-full mx-auto"></div>
+                      </div>
+                      <h3 className="font-bold text-clara-beige-foreground text-base mb-2">
+                        {selectedDate.toLocaleDateString("es-ES", {
                           day: "numeric",
+                          month: "short",
                         })}
                       </h3>
-                      <p className="text-xs text-gray-100">{formattedAppointments.length} eventos</p>
+                      <p className="text-sm text-clara-beige-foreground/90 font-medium">{formattedAppointments.length} {formattedAppointments.length === 1 ? 'evento' : 'eventos'}</p>
                     </div>
                   </div>
                 )}

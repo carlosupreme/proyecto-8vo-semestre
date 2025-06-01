@@ -5,6 +5,9 @@ export interface AppointmentPrimitives {
   clientId: string;
   timeRange: MinutesTimeRangePrimitives;
   notes: string;
+  title: string
+  tags: string[]
+  color: string
 }
 
 export interface MinutesTimeRangePrimitives {
@@ -12,13 +15,7 @@ export interface MinutesTimeRangePrimitives {
   endAt: number;
 }
 
-// Extended appointment type with UI-specific properties
-export interface Appointment extends AppointmentPrimitives {
-  title?: string;
-  color?: string;
-  tags?: string[];
-  genre?: string;
-}
+export interface Appointment extends AppointmentPrimitives { }
 
 // Helper functions for time conversion
 export function minutesToTimeString(minutes: number): string {

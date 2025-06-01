@@ -72,7 +72,7 @@ export function useCreateAppointment() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (newAppointment: Omit<AppointmentPrimitives, 'id'>) => 
+    mutationFn: (newAppointment: Omit<AppointmentPrimitives, 'id' | 'businessId'>) => 
       createAppointment(newAppointment),
     onSuccess: () => {
       // Invalidate all appointment lists to refetch data

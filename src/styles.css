@@ -53,6 +53,41 @@ code {
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Clara Theme Colors */
+  --color-clara-sage: var(--clara-sage);
+  --color-clara-sage-foreground: var(--clara-sage-foreground);
+  --color-clara-terracotta: var(--clara-terracotta);
+  --color-clara-terracotta-foreground: var(--clara-terracotta-foreground);
+  --color-clara-forest: var(--clara-forest);
+  --color-clara-forest-foreground: var(--clara-forest-foreground);
+  --color-clara-warm-gray: var(--clara-warm-gray);
+  --color-clara-warm-gray-foreground: var(--clara-warm-gray-foreground);
+  --color-clara-beige: var(--clara-beige);
+  --color-clara-beige-foreground: var(--clara-beige-foreground);
+  
+  /* Clara Light Variants */
+  --color-clara-sage-50: var(--clara-sage-50);
+  --color-clara-sage-100: var(--clara-sage-100);
+  --color-clara-sage-200: var(--clara-sage-200);
+  --color-clara-sage-300: var(--clara-sage-300);
+  --color-clara-sage-400: var(--clara-sage-400);
+  --color-clara-sage-500: var(--clara-sage);
+  --color-clara-sage-600: var(--clara-sage-600);
+  --color-clara-sage-700: var(--clara-sage-700);
+  --color-clara-sage-800: var(--clara-sage-800);
+  --color-clara-sage-900: var(--clara-sage-900);
+  
+  --color-clara-terracotta-50: var(--clara-terracotta-50);
+  --color-clara-terracotta-100: var(--clara-terracotta-100);
+  --color-clara-terracotta-200: var(--clara-terracotta-200);
+  --color-clara-terracotta-300: var(--clara-terracotta-300);
+  --color-clara-terracotta-400: var(--clara-terracotta-400);
+  --color-clara-terracotta-500: var(--clara-terracotta);
+  --color-clara-terracotta-600: var(--clara-terracotta-600);
+  --color-clara-terracotta-700: var(--clara-terracotta-700);
+  --color-clara-terracotta-800: var(--clara-terracotta-800);
+  --color-clara-terracotta-900: var(--clara-terracotta-900);
 }
 
 :root {
@@ -88,6 +123,47 @@ code {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Clara Theme Colors */
+  /* Sage Green - #899387 */
+  --clara-sage: oklch(0.614 0.024 134.76); /* Main sage green */
+  --clara-sage-foreground: oklch(0.985 0 0); /* White text */
+  --clara-sage-50: oklch(0.975 0.006 134.76);
+  --clara-sage-100: oklch(0.94 0.012 134.76);
+  --clara-sage-200: oklch(0.88 0.018 134.76);
+  --clara-sage-300: oklch(0.82 0.024 134.76);
+  --clara-sage-400: oklch(0.72 0.028 134.76);
+  --clara-sage-500: oklch(0.614 0.024 134.76); /* Base */
+  --clara-sage-600: oklch(0.52 0.024 134.76);
+  --clara-sage-700: oklch(0.44 0.022 134.76);
+  --clara-sage-800: oklch(0.36 0.018 134.76);
+  --clara-sage-900: oklch(0.28 0.014 134.76);
+  
+  /* Terracotta - #ae8276 */
+  --clara-terracotta: oklch(0.625 0.052 42.85); /* Main terracotta */
+  --clara-terracotta-foreground: oklch(0.985 0 0); /* White text */
+  --clara-terracotta-50: oklch(0.975 0.012 42.85);
+  --clara-terracotta-100: oklch(0.94 0.024 42.85);
+  --clara-terracotta-200: oklch(0.88 0.036 42.85);
+  --clara-terracotta-300: oklch(0.82 0.048 42.85);
+  --clara-terracotta-400: oklch(0.72 0.056 42.85);
+  --clara-terracotta-500: oklch(0.625 0.052 42.85); /* Base */
+  --clara-terracotta-600: oklch(0.53 0.052 42.85);
+  --clara-terracotta-700: oklch(0.45 0.048 42.85);
+  --clara-terracotta-800: oklch(0.37 0.042 42.85);
+  --clara-terracotta-900: oklch(0.29 0.036 42.85);
+  
+  /* Forest Green - #343b34 */
+  --clara-forest: oklch(0.244 0.018 134.76); /* Dark green */
+  --clara-forest-foreground: oklch(0.985 0 0); /* White text */
+  
+  /* Warm Gray - #d7d4d5 */
+  --clara-warm-gray: oklch(0.855 0.008 15.57); /* Light warm gray */
+  --clara-warm-gray-foreground: oklch(0.145 0 0); /* Dark text */
+  
+  /* Beige - #c9b096 */
+  --clara-beige: oklch(0.745 0.036 69.85); /* Warm beige */
+  --clara-beige-foreground: oklch(0.985 0 0); /* White text */
 }
 
 .dark {
@@ -122,6 +198,42 @@ code {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  
+  /* Clara Theme Colors - Dark Mode Variants */
+  --clara-sage: oklch(0.514 0.024 134.76); /* Darker sage for dark mode */
+  --clara-sage-foreground: oklch(0.985 0 0);
+  --clara-sage-50: oklch(0.2 0.006 134.76);
+  --clara-sage-100: oklch(0.25 0.012 134.76);
+  --clara-sage-200: oklch(0.32 0.018 134.76);
+  --clara-sage-300: oklch(0.42 0.024 134.76);
+  --clara-sage-400: oklch(0.52 0.028 134.76);
+  --clara-sage-500: oklch(0.614 0.024 134.76);
+  --clara-sage-600: oklch(0.72 0.024 134.76);
+  --clara-sage-700: oklch(0.82 0.022 134.76);
+  --clara-sage-800: oklch(0.88 0.018 134.76);
+  --clara-sage-900: oklch(0.94 0.014 134.76);
+  
+  --clara-terracotta: oklch(0.525 0.052 42.85); /* Darker terracotta for dark mode */
+  --clara-terracotta-foreground: oklch(0.985 0 0);
+  --clara-terracotta-50: oklch(0.2 0.012 42.85);
+  --clara-terracotta-100: oklch(0.25 0.024 42.85);
+  --clara-terracotta-200: oklch(0.32 0.036 42.85);
+  --clara-terracotta-300: oklch(0.42 0.048 42.85);
+  --clara-terracotta-400: oklch(0.52 0.056 42.85);
+  --clara-terracotta-500: oklch(0.625 0.052 42.85);
+  --clara-terracotta-600: oklch(0.73 0.052 42.85);
+  --clara-terracotta-700: oklch(0.83 0.048 42.85);
+  --clara-terracotta-800: oklch(0.87 0.042 42.85);
+  --clara-terracotta-900: oklch(0.91 0.036 42.85);
+  
+  --clara-forest: oklch(0.344 0.018 134.76); /* Lighter forest for dark mode */
+  --clara-forest-foreground: oklch(0.985 0 0);
+  
+  --clara-warm-gray: oklch(0.355 0.008 15.57); /* Darker warm gray for dark mode */
+  --clara-warm-gray-foreground: oklch(0.985 0 0);
+  
+  --clara-beige: oklch(0.645 0.036 69.85); /* Darker beige for dark mode */
+  --clara-beige-foreground: oklch(0.985 0 0);
 }
 
 @layer base {

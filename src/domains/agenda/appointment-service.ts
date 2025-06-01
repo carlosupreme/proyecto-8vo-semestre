@@ -39,7 +39,7 @@ export async function fetchAppointments(params: AppointmentQueryParams): Promise
 /**
  * Creates a new appointment
  */
-export async function createAppointment(appointment: Omit<AppointmentPrimitives, 'id'>): Promise<AppointmentPrimitives> {
+export async function createAppointment(appointment: Omit<AppointmentPrimitives, 'id' | 'businessId'>): Promise<AppointmentPrimitives> {
   try {
     const response = await fetch(`${API_BASE_URL}/appointments`, {
       method: 'POST',
