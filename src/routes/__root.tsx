@@ -1,12 +1,13 @@
-import { useAuth } from '@clerk/clerk-react';
+import { ClerkLoaded, useAuth } from '@clerk/clerk-react';
 import { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router';
+import { Link, Outlet, createRootRouteWithContext, useLocation, useNavigate } from '@tanstack/react-router';
 import { useEffect } from 'react';
 import { Toaster } from 'sonner';
-import { Layout } from '../components/layout'; // Tu componente Layout
+import { Layout } from '../components/layout';
 import { OpenaiProvider } from '../contexts/OpenaiContext';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { LandingPage } from '../components/LandingPage';
 
 const publicRoutes = ['/sign-in', '/sign-up'];
 
@@ -15,9 +16,10 @@ const isPublicRoute = (pathname: string) => {
 };
 
 const RouteComponent = () => {
+    const navigate = useNavigate();
     const { isSignedIn, isLoaded, userId } = useAuth();
     const { emit } = useWebSocket();
-    const pathname = window.location.pathname; // Considerar usar useLocation de TanStack Router si está disponible aquí
+    const pathname = useLocation().pathname;
     const currentRouteIsPublic = isPublicRoute(pathname);
 
     useEffect(() => {
@@ -34,51 +36,61 @@ const RouteComponent = () => {
         return (
             <div className="flex h-screen items-center justify-center bg-background dark:bg-gray-900">
                 <div className="text-center">
-                    <div
-                        className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary dark:border-primary-dark border-t-transparent mx-auto"></div>
+                    <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary dark:border-primary-dark border-t-transparent mx-auto"></div>
                     <p className="text-muted-foreground dark:text-gray-400">Cargando...</p>
                 </div>
             </div>
         );
     }
 
-    if (!isSignedIn && !currentRouteIsPublic) {
-        window.location.href = '/sign-in'; // O usa navigate de TanStack Router para una mejor UX
-        return (
-            <div className="flex h-screen items-center justify-center"><p>Redirigiendo...</p></div>
-        );
-    }
-
-    if (isSignedIn && currentRouteIsPublic) {
-        window.location.href = '/'; // O usa navigate
-        return (
-            <div className="flex h-screen items-center justify-center"><p>Redirigiendo...</p></div>
-        );
-    }
-
-    // Si es una ruta pública, no renderizamos Layout (que contiene NavBar)
-    if (currentRouteIsPublic) {
+    // Show landing page when not signed in and on root route
+    if (!isSignedIn && pathname === '/') {
         return (
             <>
-                <Outlet />
-                <Toaster position="top-center" /> {/* Toaster puede ser útil también en páginas públicas */}
-                {/* ReactQueryDevtools usualmente solo en desarrollo */}
+                <LandingPage />
+                <Toaster position="top-center" />
                 {import.meta.env.DEV && <ReactQueryDevtools />}
             </>
         );
     }
 
-    // Para rutas autenticadas, envolvemos con Layout (que contendrá NavBar y manejará el padding)
+    // Redirect to sign-in for protected routes when not authenticated
+    if (!isSignedIn && !currentRouteIsPublic) {
+        navigate({ to: '/sign-in' });
+        return (
+            <div className="flex h-screen items-center justify-center"><p>Redirigiendo...</p></div>
+        );
+    }
+
+    // Redirect to home when signed in and on public routes
+    if (isSignedIn && currentRouteIsPublic) {
+        navigate({ to: '/' });
+        return (
+            <div className="flex h-screen items-center justify-center"><p>Redirigiendo...</p></div>
+        );
+    }
+
+    // Render public routes (sign-in, sign-up)
+    if (currentRouteIsPublic) {
+        return (
+            <>
+                <Outlet />
+                <Toaster position="top-center" />
+                {import.meta.env.DEV && <ReactQueryDevtools />}
+            </>
+        );
+    }
+
+    // Render protected routes with layout
     return (
-        <>
+        <ClerkLoaded>
             <OpenaiProvider>
-                <Layout> {/* Layout se encarga de la NavBar y el padding */}
+                <Layout>
                     <Outlet />
                 </Layout>
             </OpenaiProvider>
             <Toaster position="top-center" />
-            {import.meta.env.DEV && <ReactQueryDevtools />}
-        </>
+        </ClerkLoaded>
     );
 };
 

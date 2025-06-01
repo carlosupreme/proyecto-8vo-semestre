@@ -15,5 +15,7 @@ export function useGetUser() {
             return response.data;
         },
         staleTime: Infinity,
+        retry: 3,
+        retryDelay: 1000,
     })
 }

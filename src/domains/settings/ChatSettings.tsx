@@ -1,6 +1,9 @@
 import { gsap } from "gsap";
 import {
     AlertTriangle,
+    Bot,
+    Brain,
+    CheckCircle,
     Clock,
     DollarSign,
     Menu,
@@ -9,17 +12,18 @@ import {
     Settings,
     Sparkles,
     User,
+    X,
     Zap
 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import claraAvatar from "../../assets/clara-avatar.jpeg";
-import MemoryPanel from "./MemoryPanel";
 
 // =================== TYPES ===================
 interface Message {
@@ -60,8 +64,7 @@ interface QuickCommand {
     text: string;
     category: MemoryCategory;
 }
-
-
+ 
 
 // =================== CONSTANTS ===================
 const MEMORY_CATEGORIES: Record<MemoryCategory, MemoryCategoryConfig> = {
@@ -248,7 +251,24 @@ const getExpirationDate = (text: string, type: MemoryType): Date | undefined => 
 
     // Default: 24 horas
     return new Date(now.getTime() + 24 * 60 * 60 * 1000);
-}; 
+};
+
+const formatTimeRemaining = (expiresAt?: Date): string | null => {
+    if (!expiresAt) return null;
+
+    const now = new Date();
+    const diff = expiresAt.getTime() - now.getTime();
+
+    if (diff <= 0) return "Expirado";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (days > 0) return `${days}d`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+};
 
 // =================== COMPONENTS ===================
 interface MessageBubbleProps {
@@ -278,7 +298,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onAnimationRef }
                     {isUser ? (
                         <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     ) : (
-                        <img src={claraAvatar} alt="Clara" className="w-8 h-8 rounded-full object-cover " />
+                        <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     )}
                 </div>
 
@@ -302,7 +322,91 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, onAnimationRef }
     );
 };
 
+interface MemoryCardProps {
+    memory: Memory;
+    onDelete: (id: string) => void;
+    onAnimationRef: (element: HTMLElement) => void;
+}
 
+const MemoryCard: React.FC<MemoryCardProps> = ({ memory, onDelete, onAnimationRef }) => {
+    const cardRef = useRef<HTMLDivElement>(null);
+    const { animateButtonPulse } = useGSAPAnimations();
+
+    useEffect(() => {
+        if (cardRef.current) {
+            onAnimationRef(cardRef.current);
+        }
+    }, [onAnimationRef]);
+
+    const categoryConfig = MEMORY_CATEGORIES[memory.category];
+    const IconComponent = categoryConfig.icon;
+    const timeRemaining = formatTimeRemaining(memory.expiresAt);
+
+    const handleDelete = () => {
+        if (cardRef.current) {
+            animateButtonPulse(cardRef.current);
+        }
+        setTimeout(() => onDelete(memory.id), 100);
+    };
+
+    return (
+        <Card
+            ref={cardRef}
+            className={`border-2 transition-all duration-200 hover:shadow-md ${categoryConfig.borderColor} ${categoryConfig.bgColor}/30`}
+        >
+            <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <IconComponent className={`w-4 h-4 flex-shrink-0 ${categoryConfig.color}`} />
+                        <Badge
+                            variant="outline"
+                            className={`text-xs ${categoryConfig.color} ${categoryConfig.borderColor} bg-white/80`}
+                        >
+                            {categoryConfig.name}
+                        </Badge>
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDelete}
+                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                        <X className="w-3 h-3" />
+                    </Button>
+                </div>
+            </CardHeader>
+
+            <CardContent className="pt-0">
+                <p className="text-sm text-gray-900 mb-3 leading-relaxed">{memory.content}</p>
+
+                <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-500">
+                        {memory.createdAt.toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short'
+                        })}
+                    </span>
+
+                    <div className="flex gap-1">
+                        {memory.type === 'temporary' && timeRemaining && (
+                            <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {timeRemaining}
+                            </Badge>
+                        )}
+
+                        {memory.type === 'permanent' && (
+                            <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50">
+                                <CheckCircle className="w-3 h-3 mr-1" />
+                                Permanente
+                            </Badge>
+                        )}
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
 
 interface TypingIndicatorProps { }
 
@@ -322,7 +426,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = () => {
         <div className="flex justify-start mb-4">
             <div ref={typingRef} className="flex gap-3 max-w-[70%]">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                    <img src={claraAvatar} alt="Clara" className="w-5 h-5 rounded-full object-cover " />
+                    <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
                     <div className="flex gap-1">
@@ -336,8 +440,62 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = () => {
     );
 };
 
- 
- 
+interface MemoryPanelProps {
+    memories: Memory[];
+    onDeleteMemory: (id: string) => void;
+    onAnimateMemoryIn: (element: HTMLElement) => void;
+}
+
+const MemoryPanel: React.FC<MemoryPanelProps> = ({ memories, onDeleteMemory, onAnimateMemoryIn }) => {
+    return (
+        <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-gray-200 bg-white">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-purple-500" />
+                    Memoria Activa
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                    {memories.length} instrucción{memories.length !== 1 ? 'es' : ''} activa{memories.length !== 1 ? 's' : ''}
+                </p>
+            </div>
+
+            <ScrollArea className="flex-1 p-4">
+                <div className="space-y-3">
+                    {memories.length === 0 ? (
+                        <div className="text-center py-8">
+                            <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                            <p className="text-sm text-gray-500">
+                                No hay instrucciones activas
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                                Envía un mensaje para entrenar a tu asistente
+                            </p>
+                        </div>
+                    ) : (
+                        memories.map((memory) => (
+                            <MemoryCard
+                                key={memory.id}
+                                memory={memory}
+                                onDelete={onDeleteMemory}
+                                onAnimationRef={onAnimateMemoryIn}
+                            />
+                        ))
+                    )}
+                </div>
+            </ScrollArea>
+
+            <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <Alert className="border-purple-200 bg-purple-50">
+                    <Brain className="w-4 h-4 text-purple-600" />
+                    <AlertDescription className="text-xs text-purple-800">
+                        Tu asistente recordará estas instrucciones en todas las conversaciones con pacientes.
+                    </AlertDescription>
+                </Alert>
+            </div>
+        </div>
+    );
+};
+
 // =================== MAIN COMPONENT ===================
 const AssistantMemorySystem: React.FC = () => {
     // States
@@ -382,7 +540,7 @@ const AssistantMemorySystem: React.FC = () => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Hooks
-    const { isMobile, } = useResponsiveLayout();
+    const { isMobile } = useResponsiveLayout();
     const { animateMessageIn, animateMemoryIn, animateButtonPulse } = useGSAPAnimations();
 
     // Effects
@@ -483,8 +641,8 @@ const AssistantMemorySystem: React.FC = () => {
             {isMobile && (
                 <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between lg:hidden">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center">
-                            <img src={claraAvatar} alt="Clara" className="w-5 h-5 rounded-full object-cover " />
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <Bot className="w-5 h-5 text-white" />
                         </div>
                         <div>
                             <h1 className="text-lg font-semibold text-gray-900">Entrena tu asistente</h1>
@@ -512,8 +670,8 @@ const AssistantMemorySystem: React.FC = () => {
                     <div className="bg-white border-b border-gray-200 p-4 xl:p-6">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full flex items-center justify-center">
-                                    <img src={claraAvatar} alt="Clara" className="w-10 h-10 rounded-full object-cover " />
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                                    <Bot className="w-6 h-6 text-white" />
                                 </div>
                                 <div>
                                     <h1 className="text-xl font-semibold text-gray-900">Entrena a tu asistente</h1>
