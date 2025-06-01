@@ -1,32 +1,32 @@
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { Plus, X } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
-import { useGetClients } from "../../clients/hooks/useGetClients"
-import { minutesToTimeString, type Appointment } from "../types"
-import { ActivityCard } from "./activity-card"
-import type { Client } from "../../clients/types"
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useGetClients } from "../../clients/hooks/useGetClients";
+import { minutesToTimeString, type Appointment } from "../types";
+import { ActivityCard } from "./activity-card"; // ActivityCard también podría necesitar ajustes
+import type { Client } from "../../clients/types";
 
 export type Activity = {
-  id: string
-  title: string
-  notes: string
-  startTime: string
-  endTime: string
-  date: string
-  tags: string[]
-  color: string
-  client: Client | undefined
-}
+  id: string;
+  title: string;
+  notes: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+  tags: string[];
+  color: string;
+  client: Client | undefined;
+};
 
 interface ActivityDrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  appointments: Appointment[]
-  selectedDate: Date
-  position: "bottom" | "right" | "left"
-  isStatic?: boolean // Nueva prop para drawer estático
-  onCreateActivity?: () => void // Nueva prop para crear actividad
+  isOpen: boolean;
+  onClose: () => void;
+  appointments: Appointment[];
+  selectedDate: Date;
+  position: "bottom" | "right" | "left";
+  isStatic?: boolean;
+  onCreateActivity?: () => void;
 }
 
 export function ActivityDrawer({
@@ -38,31 +38,27 @@ export function ActivityDrawer({
   isStatic = false,
   onCreateActivity,
 }: ActivityDrawerProps) {
-  const [activeCardId, setActiveCardId] = useState<string | null>(null) // Changed to string
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState(0)
-  const drawerRef = useRef<HTMLDivElement>(null)
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null)
+  const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
 
-  const { data: clients = [] } = useGetClients()
+  const { data: clients = [] } = useGetClients();
 
   const handleClose = () => {
-    if (!isStatic) {
-      onClose()
-    }
-  }
+    if (!isStatic) onClose();
+  };
 
-  const handleCardClick = (activityId: string) => { // Changed to string
-    setActiveCardId(activeCardId === activityId ? null : activityId)
-  }
+  const handleCardClick = (activityId: string) => {
+    setActiveCardId(activeCardId === activityId ? null : activityId);
+  };
 
-  const isBottom = position === "bottom"
-  const isLeft = position === "left"
+  const isBottom = position === "bottom";
+  const isLeft = position === "left";
 
-  // Convert Appointment to Activity format for ActivityCard
   const formattedActivities: Activity[] = appointments.map((appointment: Appointment) => {
-    const client = clients.find(client => client.id === appointment.clientId)
-
+    const client = clients.find(client => client.id === appointment.clientId);
     return {
       id: appointment.id,
       title: appointment.title,
@@ -73,283 +69,207 @@ export function ActivityDrawer({
       tags: appointment.tags || [],
       color: appointment.color || 'bg-clara-sage',
       client
-    }
-  })
+    };
+  });
 
-  // Touch event handlers para swipe to dismiss (solo para mobile)
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isOpen || isStatic) return
-
-    const touch = e.touches[0]
-    dragStartRef.current = {
-      x: touch.clientX,
-      y: touch.clientY
-    }
-    setIsDragging(true)
-  }
+    if (!isOpen || isStatic) return;
+    const touch = e.touches[0];
+    dragStartRef.current = { x: touch.clientX, y: touch.clientY };
+    setIsDragging(true);
+  };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !dragStartRef.current || !isOpen || isStatic) return
-
-    const touch = e.touches[0]
-    const deltaX = touch.clientX - dragStartRef.current.x
-    const deltaY = touch.clientY - dragStartRef.current.y
-
-    // Solo permitir swipe hacia abajo para cerrar
-    const offset = Math.max(0, deltaY)
-
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      return
-    }
-
-    setDragOffset(offset)
-
-    if (offset > 10) {
-      e.preventDefault()
-    }
-  }
+    if (!isDragging || !dragStartRef.current || !isOpen || isStatic) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - dragStartRef.current.x;
+    const deltaY = touch.clientY - dragStartRef.current.y;
+    const offset = Math.max(0, deltaY);
+    if (Math.abs(deltaX) > Math.abs(deltaY)) return;
+    setDragOffset(offset);
+    if (offset > 10) e.preventDefault();
+  };
 
   const handleTouchEnd = () => {
-    if (!isDragging || !isOpen || isStatic) return
+    if (!isDragging || !isOpen || isStatic) return;
+    const threshold = 80; // Reducido
+    if (dragOffset > threshold) handleClose();
+    setIsDragging(false);
+    setDragOffset(0);
+    dragStartRef.current = null;
+  };
 
-    const threshold = 100
-    const shouldClose = dragOffset > threshold
-
-    if (shouldClose) {
-      handleClose()
-    }
-
-    setIsDragging(false)
-    setDragOffset(0)
-    dragStartRef.current = null
-  }
-
-  // Reset drag state when drawer closes
   useEffect(() => {
     if (!isOpen && !isStatic) {
-      setIsDragging(false)
-      setDragOffset(0)
-      dragStartRef.current = null
+      setIsDragging(false);
+      setDragOffset(0);
+      dragStartRef.current = null;
     }
-  }, [isOpen, isStatic])
+  }, [isOpen, isStatic]);
 
-  // Prevent body scroll when drawer is open on mobile (solo si no es estático)
   useEffect(() => {
-    if (isStatic) return
+    if (isStatic) return;
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen, isStatic]);
 
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset'
-    }
-  }, [isOpen, isStatic])
-
-  // Calculate position and height for each activity (solo para timeline view)
   const getActivityStyle = (activity: Appointment) => {
-    const startMinutes = activity.timeRange.startAt
-    const endMinutes = activity.timeRange.endAt
-    const duration = endMinutes - startMinutes
+    const startMinutes = activity.timeRange.startAt;
+    const endMinutes = activity.timeRange.endAt;
+    const duration = endMinutes - startMinutes;
+    const pixelsPerMinute = 0.8; // Reducido para que la timeline sea más compacta
+    const top = (startMinutes - 360) * pixelsPerMinute; // 360 = 6:00 AM
+    const height = activeCardId === activity.id ? "auto" : Math.max(duration * pixelsPerMinute, 30); // Reducido min height
+    const zIndex = activeCardId === activity.id ? 50 : 10;
+    return { top: Math.max(top, 0), height, zIndex };
+  };
 
-    const pixelsPerMinute = 1
-    const top = (startMinutes - 360) * pixelsPerMinute // 360 = 6:00 AM
-
-    const height = activeCardId === activity.id ? "auto" : Math.max(duration * pixelsPerMinute, 40)
-    const zIndex = activeCardId === activity.id ? 50 : 10
-
-    return {
-      top: Math.max(top, 0),
-      height,
-      zIndex,
-    }
-  }
-
-  // Generate time labels for the timeline
   const generateTimeLabels = () => {
-    const labels = []
+    const labels = [];
     for (let hour = 6; hour <= 23; hour++) {
-      const time = `${hour.toString().padStart(2, "0")}:00`
-      const position = (hour - 6) * 60
-      labels.push({ time, position })
+      const time = `${hour.toString().padStart(2, "0")}:00`;
+      const position = (hour - 6) * 60 * 0.8; // Ajustado a pixelsPerMinute
+      labels.push({ time, position });
     }
-    return labels
-  }
+    return labels;
+  };
+  const timeLabels = generateTimeLabels();
 
-  const timeLabels = generateTimeLabels()
+  const sortedActivities = [...appointments].sort((a, b) => a.timeRange.startAt - b.timeRange.startAt);
 
-  // Sort activities by start time
-  const sortedActivities = [...appointments].sort((a, b) =>
-    a.timeRange.startAt - b.timeRange.startAt
-  )
+  const getDrawerTransform = () => (isDragging && dragOffset !== 0 && !isStatic ? `translateY(${dragOffset}px)` : "");
+  const getDrawerOpacity = () => (isDragging && dragOffset !== 0 && !isStatic ? Math.max(0.5, 1 - (dragOffset / 150)) : 1); // Reducido maxOffset
 
-  // Calculate transform based on drag offset
-  const getDrawerTransform = () => {
-    if (!isDragging || dragOffset === 0 || isStatic) return ""
-    return `translateY(${dragOffset}px)`
-  }
-
-  // Calculate opacity based on drag progress
-  const getDrawerOpacity = () => {
-    if (!isDragging || dragOffset === 0 || isStatic) return 1
-    const maxOffset = 200
-    const opacity = Math.max(0.5, 1 - (dragOffset / maxOffset))
-    return opacity
-  }
-
-  // Determinar clases base según el tipo de drawer
   const getDrawerClasses = () => {
     if (isStatic && isLeft) {
-      // Drawer estático izquierdo para desktop
-      return "fixed left-4 top-4 w-80 h-[97vh] z-10"
+      // Reducido ancho y alto, más pegado
+      return "fixed left-2 top-2 w-72 h-[calc(100vh-1rem)] z-10"; 
     }
-
-    // Drawer normal con transiciones
     return cn(
       "fixed z-50 transition-all duration-300 ease-in-out",
       isBottom && "inset-x-0 rounded-r-lg",
-      isLeft && !isStatic && "top-0 h-full w-full max-w-md md:w-[400px]",
-      // Posicionamiento condicional
+      // Reducido ancho para drawer lateral móvil/tablet
+      isLeft && !isStatic && "top-0 h-full w-full max-w-xs sm:max-w-sm md:w-[320px]", 
       isBottom
         ? (isOpen ? "bottom-0" : "-bottom-full")
         : isLeft && !isStatic
           ? (isOpen ? "left-0" : "-left-full")
           : (isOpen ? "right-0" : "-right-full"),
-      // Altura para bottom drawer
-      isBottom && "h-[85vh] md:h-[80vh]",
+      // Reducida altura para bottom drawer
+      isBottom && "h-[75vh] md:h-[70vh]",
       !isOpen && !isStatic && "pointer-events-none",
       isDragging && !isStatic && "transition-none"
-    )
-  }
+    );
+  };
 
-  const getContentClasses = () => {
-    return cn(
-      "flex h-full flex-col overflow-hidden bg-gradient-to-br from-[#f8f8f8] to-[#ececec] shadow-xl border border-white/20 backdrop-blur-sm",
-      isStatic && isLeft ? "rounded-3xl" : isBottom ? "rounded-t-3xl" : "rounded-l-3xl"
-    )
-  }
+  const getContentClasses = () => cn(
+    "flex h-full flex-col overflow-y-auto bg-gradient-to-br from-[#f8f8f8] to-[#ececec] shadow-lg border border-white/20 backdrop-blur-sm",
+    // Reducido rounded
+    isStatic && isLeft ? "rounded-2xl" : isBottom ? "rounded-t-2xl" : "rounded-l-2xl"
+  );
 
-  // Render mobile/tablet timeline content
   const renderTimelineContent = () => (
     <div className={getContentClasses()}>
-      {/* Drawer header */}
       <div
-        className="flex items-center justify-between border-b bg-gradient-to-r from-clara-warm-gray to-clara-beige p-6 border-white/20 relative"
+        className="flex items-center justify-between border-b bg-gradient-to-r from-clara-warm-gray to-clara-beige p-4 border-white/20 relative" // Reducido padding
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Drag handle - solo para mobile */}
-        {!isStatic && (
-          <div className="absolute left-1/2 top-3 h-1.5 w-16 -translate-x-1/2 rounded-full bg-white/40 shadow-sm">
-            <div className="absolute -top-3 -bottom-3 -left-6 -right-6" />
+        {!isStatic && ( // Reducido drag handle
+          <div className="absolute left-1/2 top-2 h-1 w-12 -translate-x-1/2 rounded-full bg-white/30 shadow-sm">
+            <div className="absolute -top-2 -bottom-2 -left-4 -right-4" />
           </div>
         )}
-
-        <div className={isStatic ? "" : "pt-3"}>
-          <h3 className="text-xl font-bold text-clara-warm-gray-foreground capitalize mb-1">
+        <div className={isStatic ? "" : "pt-2"}> {/* Reducido pt */}
+          <h3 className="text-base sm:text-lg font-semibold text-clara-warm-gray-foreground capitalize mb-0.5"> {/* Reducido texto y mb */}
             {(() => {
-              const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
-              const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-              const dayName = dayNames[selectedDate.getDay()]
-              const day = selectedDate.getDate()
-              const month = monthNames[selectedDate.getMonth()]
-              const year = selectedDate.getFullYear()
-              return `${dayName} ${day} de ${month}, ${year}`
+              const dayNames = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']; // Abreviado
+              const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']; // Abreviado
+              return `${dayNames[selectedDate.getDay()]} ${selectedDate.getDate()} de ${monthNames[selectedDate.getMonth()]}, ${selectedDate.getFullYear()}`;
             })()}
           </h3>
-          <p className="text-sm text-clara-warm-gray-foreground/70 font-medium">
-            {appointments.length} {appointments.length === 1 ? "actividad" : "actividades"} programadas
+          <p className="text-xs text-clara-warm-gray-foreground/70 font-medium"> {/* Reducido texto */}
+            {appointments.length} {appointments.length === 1 ? "actividad" : "actividades"}
           </p>
         </div>
-
         {!isStatic && (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handleClose} className="h-10 w-10 rounded-full hover:bg-white/20 transition-all duration-200">
-              <X className="h-5 w-5 text-clara-warm-gray-foreground" />
+          <div className="flex items-center gap-1"> {/* Reducido gap */}
+            <Button variant="ghost" size="icon" onClick={handleClose} className="h-8 w-8 rounded-full hover:bg-white/20"> {/* Reducido botón */}
+              <X className="h-4 w-4 text-clara-warm-gray-foreground" /> {/* Reducido icono */}
               <span className="sr-only">Cerrar</span>
             </Button>
           </div>
         )}
       </div>
 
-      {/* Calendar timeline content */}
       <div className="flex-1 overflow-y-auto">
         {appointments.length > 0 ? (
           <div className="relative border-transparent">
-            {/* Time labels and grid lines */}
-            <div className="absolute left-0 top-0 h-full w-20 bg-gradient-to-r from-white/50 to-transparent">
+            <div className="absolute left-0 top-0 h-full w-16 bg-gradient-to-r from-white/50 to-transparent"> {/* Reducido ancho labels */}
               {timeLabels.map(({ time, position }) => (
                 <div
                   key={time}
-                  className="absolute left-0 flex items-center text-sm font-bold text-clara-warm-gray-foreground/80"
+                  className="absolute left-0 flex items-center text-xs font-semibold text-clara-warm-gray-foreground/80" /* Reducido texto */
                   style={{ top: position }}
                 >
-                  <span className="w-16 pr-3 text-right bg-white/70 rounded-r-lg py-1 backdrop-blur-sm">{time}</span>
+                  <span className="w-14 pr-1.5 text-right bg-white/60 rounded-r-md py-0.5 backdrop-blur-sm">{time}</span> {/* Reducido ancho, pr, rounded, py */}
                 </div>
               ))}
             </div>
-
-            {/* Grid lines */}
-            <div className="absolute left-20 top-0 right-0 h-full border-transparent">
+            <div className="absolute left-16 top-0 right-0 h-full border-transparent"> {/* Ajustado left */}
               {timeLabels.map(({ position }) => (
-                <div
-                  key={position}
-                  className="absolute left-0 right-0 border-t border-clara-warm-gray/20"
-                  style={{ top: position }}
-                />
+                <div key={position} className="absolute left-0 right-0 border-t border-clara-warm-gray/20" style={{ top: position }} />
               ))}
             </div>
-
-            {/* Activities */}
-            <div className="relative ml-20 mr-6" style={{ height: `${18 * 60}px` }}>
+            <div className="relative ml-16 mr-2 sm:mr-4" style={{ height: `${18 * 60 * 0.8}px` }}> {/* Ajustado ml, mr y height */}
               {sortedActivities.map((appointment) => {
-                const style = getActivityStyle(appointment)
-                const isActive = activeCardId === appointment.id
-
-                // Find the corresponding formatted activity for ActivityCard
-                const formattedActivity = formattedActivities.find(fa => fa.id === appointment.id)
-
-                if (!formattedActivity) return null
-
+                const style = getActivityStyle(appointment);
+                const isActive = activeCardId === appointment.id;
+                const formattedActivity = formattedActivities.find(fa => fa.id === appointment.id);
+                if (!formattedActivity) return null;
                 return (
                   <div
                     key={appointment.id}
-                    className={cn("absolute left-2 right-0", isActive && "h-auto min-h-[160px]")}
+                    // Reducido min-height
+                    className={cn("absolute left-1.5 right-0", isActive && "h-auto min-h-[120px]")} 
                     style={{
                       top: `${style.top}px`,
                       height: isActive ? "auto" : `${style.height}px`,
-                      minHeight: isActive ? "160px" : undefined,
+                      minHeight: isActive ? "120px" : undefined,
                       zIndex: style.zIndex,
                     }}
                   >
-                    <ActivityCard
+                    <ActivityCard // ActivityCard también debe ser más compacta
                       activity={formattedActivity}
                       isTimelineView
                       isActive={isActive}
                       onClick={() => handleCardClick(appointment.id)}
                     />
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <div className="text-center p-8">
-              <div className="bg-clara-sage p-6 rounded-3xl mb-6 mx-auto w-fit">
-                <div className="w-12 h-12 bg-white/30 rounded-2xl mx-auto"></div>
+            <div className="text-center p-4 sm:p-6"> {/* Reducido padding */}
+              <div className="bg-clara-sage p-4 rounded-2xl mb-4 mx-auto w-fit"> {/* Reducido padding, rounded, mb */}
+                <div className="w-10 h-10 bg-white/30 rounded-xl mx-auto"></div> {/* Reducido icono */}
               </div>
-              <h4 className="text-lg font-bold text-clara-warm-gray-foreground mb-2">¡Día libre!</h4>
-              <p className="text-clara-warm-gray-foreground/70 mb-6 text-sm">Parece que puedes tomarte este día para descansar</p>
+              <h4 className="text-base font-semibold text-clara-warm-gray-foreground mb-1"> {/* Reducido texto y mb */}
+                ¡Día libre!
+              </h4>
+              <p className="text-clara-warm-gray-foreground/70 mb-4 text-xs"> {/* Reducido texto y mb */}
+                Parece que puedes tomarte este día para descansar
+              </p>
               {onCreateActivity && isStatic && (
-                <Button
+                <Button // Reducido botón
                   onClick={onCreateActivity}
-                  className="bg-clara-forest hover:bg-clara-forest/90 text-clara-forest-foreground rounded-2xl px-8 py-3 font-semibold transition-all duration-200 shadow-lg"
+                  className="bg-clara-forest hover:bg-clara-forest/90 text-clara-forest-foreground rounded-xl px-4 py-2 text-sm font-medium shadow-md"
                 >
-                  <Plus className="w-5 h-5 mr-3" />
+                  <Plus className="w-4 h-4 mr-2" /> {/* Reducido icono y mr */}
                   Crear actividad
                 </Button>
               )}
@@ -358,29 +278,21 @@ export function ActivityDrawer({
         )}
       </div>
     </div>
-  )
+  );
 
-  // Para drawer estático, no mostrar backdrop pero usar el mismo contenido timeline
   if (isStatic && isLeft) {
-    return (
-      <div className={getDrawerClasses()}>
-        {renderTimelineContent()}
-      </div>
-    )
+    return <div className={getDrawerClasses()}>{renderTimelineContent()}</div>;
   }
 
-  // Para drawer normal (mobile/tablet)
   return (
     <>
-      {/* Backdrop */}
       {isOpen && !isStatic && (
         <div
-          className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/15 z-40 transition-opacity duration-300" // Más sutil backdrop
           style={{ opacity: getDrawerOpacity() }}
           onClick={handleClose}
         />
       )}
-
       <div
         ref={drawerRef}
         className={getDrawerClasses()}
@@ -392,5 +304,5 @@ export function ActivityDrawer({
         {renderTimelineContent()}
       </div>
     </>
-  )
+  );
 }

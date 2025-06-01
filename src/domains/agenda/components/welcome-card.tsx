@@ -1,11 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"; // useEffect para sincronizar isEnabled
 
 interface WelcomeCardProps {
-  userName?: string
-  greeting?: string
-  showLogo?: boolean
-  isEnabled?: boolean
-  onClaraToggle?: (enabled: boolean) => void
+  userName?: string;
+  greeting?: string;
+  showLogo?: boolean;
+  isEnabled?: boolean;
+  onClaraToggle?: (enabled: boolean) => void;
 }
 
 export default function WelcomeCard({
@@ -15,39 +15,45 @@ export default function WelcomeCard({
   onClaraToggle,
   isEnabled = true,
 }: WelcomeCardProps) {
-  const [claraEnabled, setClaraEnabled] = useState(isEnabled)
+  const [claraEnabled, setClaraEnabled] = useState(isEnabled);
+
+  // Sincronizar el estado local si la prop isEnabled cambia desde fuera
+  useEffect(() => {
+    setClaraEnabled(isEnabled);
+  }, [isEnabled]);
 
   const handleSwitchChange = () => {
-    const newState = !claraEnabled
-    setClaraEnabled(newState)
-    onClaraToggle?.(newState)
-  }
+    const newState = !claraEnabled;
+    setClaraEnabled(newState);
+    onClaraToggle?.(newState);
+  };
 
   return (
-    <div className="bg-transparent p-6 pt-8 pb-4 w-full mx-auto">
+    // Reducido padding
+    <div className="bg-transparent p-3 sm:p-4 pt-4 sm:pt-6 pb-2 sm:pb-3 w-full mx-auto"> 
       <div className="flex items-center justify-between">
-        {/* Left side - Greeting and Name */}
         <div className="flex-1">
-          <h1 className="text-4xl font-bold text-gray-900 leading-tight mb-4 tracking-tight">{greeting}</h1>
-          <div className="flex items-center gap-3">
+          {/* Reducido tamaño de fuente y margen */}
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 leading-tight mb-2 sm:mb-3 tracking-tight">{greeting}</h1>
+          <div className="flex items-center gap-2 sm:gap-2.5"> {/* Reducido gap */}
             <div className="relative">
-              <div className="w-3 h-3 bg-clara-sage rounded-full animate-pulse"></div>
-              <div className="absolute inset-0 w-3 h-3 bg-clara-sage rounded-full animate-ping opacity-20"></div>
+              {/* Reducido tamaño del punto */}
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-clara-sage rounded-full animate-pulse"></div>
+              <div className="absolute inset-0 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-clara-sage rounded-full animate-ping opacity-20"></div>
             </div>
-            <span className="text-gray-700 font-semibold text-lg">{userName}</span>
+            {/* Reducido tamaño de fuente */}
+            <span className="text-gray-700 font-medium text-sm sm:text-base">{userName}</span>
           </div>
         </div>
 
-        {/* Right side - CLARA Switch */}
-        <div className="flex flex-col items-end space-y-4">
+        <div className="flex flex-col items-end space-y-2 sm:space-y-3"> {/* Reducido space-y */}
           {showLogo && (
             <>
-              {/* CLARA Label */}
               <div className="text-right">
-                <span className="text-sm font-bold text-gray-500 tracking-wider uppercase">Asistente virtual</span>
+                {/* Reducido tamaño de fuente */}
+                <span className="text-xs font-semibold text-gray-500 tracking-wide uppercase">Asistente virtual</span>
               </div>
               
-              {/* Enhanced Switch */}
               <div className="relative">
                 <input
                   type="checkbox"
@@ -59,34 +65,34 @@ export default function WelcomeCard({
                 <label
                   htmlFor="clara-switch"
                   className={`
-                    relative inline-flex items-center justify-center w-16 h-8 rounded-full cursor-pointer transition-all duration-300 ease-in-out border-2
+                    relative inline-flex items-center justify-center w-12 h-6 sm:w-14 sm:h-7 rounded-full cursor-pointer transition-all duration-300 ease-in-out border-2
                     ${claraEnabled 
-                      ? 'bg-clara-sage shadow-lg border-clara-sage shadow-clara-sage/20' 
-                      : 'bg-gray-200 shadow-sm border-gray-300'
+                      ? 'bg-clara-sage shadow-md border-clara-sage shadow-clara-sage/15' // Sombra más sutil
+                      : 'bg-gray-200 shadow-xs border-gray-300' // Sombra más sutil
                     }
-                    hover:scale-105 hover:shadow-xl
-                  `}
+                    hover:scale-105 hover:shadow-lg
+                  `} // Reducido w y h del switch
                 >
                   <span
                     className={`
-                      absolute w-6 h-6 bg-white rounded-full shadow-lg transform transition-all duration-300 ease-in-out
+                      absolute w-4 h-4 sm:w-5 sm:h-5 bg-white rounded-full shadow-md transform transition-all duration-300 ease-in-out
                       ${claraEnabled 
-                        ? 'translate-x-4 shadow-md' 
-                        : '-translate-x-4'
+                        ? 'translate-x-3 sm:translate-x-3.5' // Ajustado translate
+                        : '-translate-x-3 sm:-translate-x-3.5' // Ajustado translate
                       }
                       flex items-center justify-center
-                    `}
+                    `} // Reducido w y h del círculo
                   >
-                    {claraEnabled && (
-                      <div className="w-2 h-2 bg-clara-sage rounded-full"></div>
+                    {claraEnabled && ( // Reducido punto interno
+                      <div className="w-1.5 h-1.5 bg-clara-sage rounded-full"></div>
                     )}
                   </span>
                 </label>
               </div>
               
-              {/* Status Text */}
               <div className="text-right">
-                <span className={`text-xs font-medium ${
+                {/* Mantener text-xs, pero font-medium a font-normal si se necesita más compacto */}
+                <span className={`text-xs font-normal ${
                   claraEnabled ? 'text-clara-sage' : 'text-gray-400'
                 }`}>
                   {claraEnabled ? 'Activo' : 'Inactivo'}
@@ -97,5 +103,5 @@ export default function WelcomeCard({
         </div>
       </div>
     </div>
-  )
+  );
 }
