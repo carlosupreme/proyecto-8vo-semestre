@@ -169,7 +169,7 @@ export function ChatList({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900"> {/* Contenedor principal para altura completa */}
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 overflow-y-auto" > {/* Contenedor principal para altura completa */}
       {successMessage && (
         <div className="fixed top-4 right-4 z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
           <Alert className="w-auto shadow-lg border-green-200 bg-green-50 dark:bg-green-800/30 dark:border-green-700">

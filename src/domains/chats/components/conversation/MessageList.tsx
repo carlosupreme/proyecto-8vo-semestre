@@ -16,12 +16,10 @@ interface MessageListProps {
     onRetry?: () => void;
     hasMore?: boolean;
     onLoadMore?: () => void;
-    chatId: string
 }
 
 export function MessageList({
     messages,
-    chatId:_chatId,
     isLoading = false,
     error = null,
     onRetry = () => {
