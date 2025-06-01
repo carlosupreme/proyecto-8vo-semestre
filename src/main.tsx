@@ -1,5 +1,4 @@
 import { ClerkProvider } from '@clerk/clerk-react'
-import { esMX } from '@clerk/localizations'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { StrictMode } from 'react'
@@ -46,7 +45,6 @@ if (rootElement && !rootElement.innerHTML) {
     <StrictMode>
       <QueryClientProvider client={queryClient}>
         <ClerkProvider
-          localization={esMX}
           publishableKey={PUBLISHABLE_KEY}
           afterSignOutUrl="/"
         >

@@ -44,7 +44,7 @@ const NavBar = () => {
         return (
             <div
                 className={cn(
-                    "fixed bottom-0 left-0 right-0 h-16 bg-clara-beige-50 border-t border-clara-beige-200 shadow-[0_-2px_10px_rgba(0,0,0,0.03)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.15)] z-50",
+                    "fixed bottom-0 left-0 right-0 h-16 bg-background border-t border-clara-beige-200 shadow-[0_-2px_10px_rgba(0,0,0,0.03)] dark:shadow-[0_-2px_10px_rgba(0,0,0,0.15)] z-50",
                     "pb-1" // O tu padding para safe area
                 )}
             >
@@ -101,6 +101,8 @@ const NavBar = () => {
                             {navItems.map((item) => (
                                 <NavItem key={item.to} item={item} />
                             ))}
+
+
                         </ul>
                     </nav>
                 </div>

@@ -92,10 +92,6 @@ export function CreateActivityDialog({
       newErrors.title = 'El título es requerido'
     }
 
-    if (!formData.clientId) {
-      newErrors.clientId = 'Debe seleccionar un cliente'
-    }
-
     const startMinutes = timeStringToMinutes(formData.startTime)
     const endMinutes = timeStringToMinutes(formData.endTime)
 
@@ -207,7 +203,7 @@ export function CreateActivityDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-gradient-to-br from-clara-warm-gray to-white w-[95%] sm:max-w-[600px] rounded-3xl border border-clara-warm-gray/30 shadow-2xl">
+      <DialogContent className="bg-gradient-to-br from-clara-warm-gray to-white w-[95%] sm:max-w-[600px] h-[95%] overflow-y-auto rounded-3xl border border-clara-warm-gray/30 shadow-2xl">
         <DialogHeader className="pb-6">
           <DialogTitle className="text-2xl font-bold text-clara-warm-gray-foreground flex items-center gap-3">
             <div className="bg-clara-sage p-2 rounded-2xl">

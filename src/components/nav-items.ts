@@ -3,6 +3,7 @@ import {
     CalendarDays,
     MessageSquare,
     Settings,
+    User2,
     type LucideIcon
 } from "lucide-react";
 
@@ -17,4 +18,5 @@ export const navItems: NavItem[] = [
     { to: "/agenda", label: "Agenda", icon: CalendarDays },
     { to: "/memoria", label: "CLARA", icon: Brain },
     { to: "/ajustes", label: "Ajustes", icon: Settings },
+    { to: "/cuenta", label: "Cuenta", icon: User2 },
 ];
