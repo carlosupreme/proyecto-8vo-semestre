@@ -1,12 +1,13 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import {
     AlertCircle,
     Bot,
@@ -21,16 +22,17 @@ import {
     Save,
     SettingsIcon,
     Shield,
+    Sparkles,
     Sun,
-    Trash2
+    Trash2,
+    Zap
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAvailableModels, useOpenAIAssistant, useUpdateAssistant } from "../../hooks/useOpenAIAssistant";
+import { useOpenAIAssistant, useUpdateAssistant } from "../../hooks/useOpenAIAssistant";
 import { RunParametersCard } from "./RunParametersCard";
 
 export function Settings() {
     const { data: assistant, isLoading: isAssistantLoading, error: assistantError, refetch } = useOpenAIAssistant();
-    const { data: availableModels, isLoading: isModelsLoading } = useAvailableModels();
     const updateAssistantMutation = useUpdateAssistant();
 
     const [assistantConfig, setAssistantConfig] = useState({
@@ -76,14 +78,12 @@ export function Settings() {
         }
     }, [assistant, assistantConfig]);
 
-
     const handleInputChange = (field: string, value: string) => {
         setAssistantConfig(prev => ({
             ...prev,
             [field]: value
         }));
     };
-
 
     const handleSaveAssistant = async () => {
         try {
@@ -215,57 +215,58 @@ export function Settings() {
                         <Bot className="w-4 h-4" />
                         Asistente
                     </TabsTrigger>
-                    <TabsTrigger value="general" className="gap-2">
+                    {/* <TabsTrigger value="general" className="gap-2">
                         <Palette className="w-4 h-4" />
                         General
                     </TabsTrigger>
                     <TabsTrigger value="privacy" className="gap-2">
                         <Shield className="w-4 h-4" />
                         Privacidad
-                    </TabsTrigger>
+                    </TabsTrigger> */}
                 </TabsList>
 
                 <TabsContent value="assistant" className="space-y-6">
+
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Bot className="w-5 h-5" />
-                                Información del Asistente
+                                <Sparkles className="w-5 h-5" />
+                                Personalidad y Comportamiento
                             </CardTitle>
                             <CardDescription>
-                                Configuración básica de tu asistente de IA
+                                Define cómo se comporta y responde tu asistente
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {/* Modelo */}
+
+
+                            {/* Instrucciones personalizadas */}
                             <div className="space-y-2">
-                                <Label className="text-base font-medium">
-                                    Modelo de IA
-                                </Label>
-                                <Select
-                                    value={assistantConfig.model}
-                                    onValueChange={(value) => handleInputChange('model', value)}
-                                    disabled={isModelsLoading}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder={isModelsLoading ? "Cargando modelos..." : "Selecciona un modelo"} />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableModels?.map((model) => (
-                                            <SelectItem key={model.id} value={model.id}>
-                                                {model.id}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <p className="text-xs text-muted-foreground">
-                                    El modelo determina las capacidades y velocidad de respuesta
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="instructions" className="text-base font-medium">
+                                        Instrucciones del Sistema
+                                    </Label>
+                                    <Badge variant="secondary" className="gap-1">
+                                        <Zap className="w-3 h-3" />
+                                        Avanzado
+                                    </Badge>
+                                </div>
+                                <Textarea
+                                    id="instructions"
+                                    value={assistantConfig.instructions}
+                                    onChange={(e) => handleInputChange('instructions', e.target.value)}
+                                    rows={6}
+                                    placeholder="Define cómo quieres que se comporte tu asistente..."
+                                    className="resize-none"
+                                />
+                                <p className="text-xs text-muted-foreground flex items-start gap-1">
+                                    <Info className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                    Estas instrucciones definen el comportamiento base del asistente.
+                                    Sé específico sobre el tono, estilo y tipo de respuestas que esperas.
                                 </p>
                             </div>
                         </CardContent>
                     </Card>
-
-
 
                     <RunParametersCard />
 

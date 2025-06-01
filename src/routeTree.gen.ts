@@ -13,7 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as SignUpImport } from './routes/sign-up'
 import { Route as SignInImport } from './routes/sign-in'
-import { Route as CuentaImport } from './routes/cuenta'
+import { Route as MemoriaImport } from './routes/memoria'
 import { Route as AjustesImport } from './routes/ajustes'
 import { Route as AgendaImport } from './routes/agenda'
 import { Route as IndexImport } from './routes/index'
@@ -34,9 +34,9 @@ const SignInRoute = SignInImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const CuentaRoute = CuentaImport.update({
-  id: '/cuenta',
-  path: '/cuenta',
+const MemoriaRoute = MemoriaImport.update({
+  id: '/memoria',
+  path: '/memoria',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -95,11 +95,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AjustesImport
       parentRoute: typeof rootRoute
     }
-    '/cuenta': {
-      id: '/cuenta'
-      path: '/cuenta'
-      fullPath: '/cuenta'
-      preLoaderRoute: typeof CuentaImport
+    '/memoria': {
+      id: '/memoria'
+      path: '/memoria'
+      fullPath: '/memoria'
+      preLoaderRoute: typeof MemoriaImport
       parentRoute: typeof rootRoute
     }
     '/sign-in': {
@@ -139,7 +139,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/ajustes': typeof AjustesRoute
-  '/cuenta': typeof CuentaRoute
+  '/memoria': typeof MemoriaRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/chats/$chatId': typeof ChatsChatIdRoute
@@ -150,7 +150,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/ajustes': typeof AjustesRoute
-  '/cuenta': typeof CuentaRoute
+  '/memoria': typeof MemoriaRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/chats/$chatId': typeof ChatsChatIdRoute
@@ -162,7 +162,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/agenda': typeof AgendaRoute
   '/ajustes': typeof AjustesRoute
-  '/cuenta': typeof CuentaRoute
+  '/memoria': typeof MemoriaRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/chats/$chatId': typeof ChatsChatIdRoute
@@ -175,7 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/ajustes'
-    | '/cuenta'
+    | '/memoria'
     | '/sign-in'
     | '/sign-up'
     | '/chats/$chatId'
@@ -185,7 +185,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/ajustes'
-    | '/cuenta'
+    | '/memoria'
     | '/sign-in'
     | '/sign-up'
     | '/chats/$chatId'
@@ -195,7 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/agenda'
     | '/ajustes'
-    | '/cuenta'
+    | '/memoria'
     | '/sign-in'
     | '/sign-up'
     | '/chats/$chatId'
@@ -207,7 +207,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AgendaRoute: typeof AgendaRoute
   AjustesRoute: typeof AjustesRoute
-  CuentaRoute: typeof CuentaRoute
+  MemoriaRoute: typeof MemoriaRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   ChatsChatIdRoute: typeof ChatsChatIdRoute
@@ -218,7 +218,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AgendaRoute: AgendaRoute,
   AjustesRoute: AjustesRoute,
-  CuentaRoute: CuentaRoute,
+  MemoriaRoute: MemoriaRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   ChatsChatIdRoute: ChatsChatIdRoute,
@@ -238,7 +238,7 @@ export const routeTree = rootRoute
         "/",
         "/agenda",
         "/ajustes",
-        "/cuenta",
+        "/memoria",
         "/sign-in",
         "/sign-up",
         "/chats/$chatId",
@@ -254,8 +254,8 @@ export const routeTree = rootRoute
     "/ajustes": {
       "filePath": "ajustes.tsx"
     },
-    "/cuenta": {
-      "filePath": "cuenta.tsx"
+    "/memoria": {
+      "filePath": "memoria.tsx"
     },
     "/sign-in": {
       "filePath": "sign-in.tsx"

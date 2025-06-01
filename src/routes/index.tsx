@@ -15,7 +15,7 @@ function App() {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <p>Redirecting to agenda...</p>
+      <p>Cargando...</p>
     </div>
   )
 }

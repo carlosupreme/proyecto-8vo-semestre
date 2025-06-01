@@ -21,7 +21,7 @@ interface MessageListProps {
 
 export function MessageList({
     messages,
-    chatId,
+    chatId:_chatId,
     isLoading = false,
     error = null,
     onRetry = () => {

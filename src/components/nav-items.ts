@@ -15,6 +15,6 @@ export type NavItem = {
 export const navItems: NavItem[] = [
     { to: "/chats", label: "Chats", icon: MessageSquare },
     { to: "/agenda", label: "Agenda", icon: CalendarDays },
-    { to: "/cuenta", label: "CLARA", icon: Brain },
+    { to: "/memoria", label: "CLARA", icon: Brain },
     { to: "/ajustes", label: "Ajustes", icon: Settings },
 ];

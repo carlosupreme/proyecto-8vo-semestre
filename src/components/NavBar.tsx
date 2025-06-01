@@ -1,22 +1,12 @@
-import { navItems } from "./nav-items";
-import NavItem from "./NavItem";
-import { useState, useEffect } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "@tanstack/react-router";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { useState } from "react";
+import { useIsMobile } from "../hooks/useMobile";
+import { navItems } from "./nav-items";
+import NavItem from "./NavItem";
 
-const useIsMobile = (breakpoint = 768) => {
-    const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
-    useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < breakpoint);
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, [breakpoint]);
-    return isMobile;
-};
-
-// Componente NavItem específico para la barra móvil
 const MobileNavItem = ({ item, isActive }: { item: typeof navItems[0], isActive: boolean }) => {
     return (
         <Link
@@ -31,19 +21,19 @@ const MobileNavItem = ({ item, isActive }: { item: typeof navItems[0], isActive:
         >
             <item.icon className={cn(
                 "h-5 w-5 sm:h-[1.125rem] sm:w-[1.125rem] mb-0.5 transition-transform duration-150 ease-in-out",
-                 isActive ? "scale-110" : "group-hover:scale-105" // Efecto sutil en icono
-                )} />
+                isActive ? "scale-110" : "group-hover:scale-105" // Efecto sutil en icono
+            )} />
             <span className={cn(
                 "text-[0.65rem] sm:text-xs leading-tight tracking-tight",
-                 isActive && "font-semibold" // Fuente más gruesa para el label activo
-                )}>{item.label}</span>
+                isActive && "font-semibold" // Fuente más gruesa para el label activo
+            )}>{item.label}</span>
         </Link>
     );
 };
 
 const NavBar = () => {
     const [isCollapsedForDesktop, setIsCollapsedForDesktop] = useState(false);
-    const isMobile = useIsMobile(768);
+    const isMobile = useIsMobile();
     const location = useLocation();
 
     const toggleCollapseForDesktop = () => {
@@ -77,39 +67,39 @@ const NavBar = () => {
     return (
         <div
             className={cn(
-                "fixed left-1/2 transform -translate-x-1/2 bg-clara-forest text-clara-forest-foreground shadow-xl z-50 transition-all duration-300 ease-in-out print:hidden",
+                "fixed left-1/2 transform -translate-x-1/2 bg-primary shadow-lg z-50 max-w-fit transition-all duration-300 ease-in-out",
                 isCollapsedForDesktop
-                    ? "bottom-0 rounded-t-lg py-0 px-2 h-7 hover:h-8"
-                    : "bottom-4 rounded-full px-5 py-2" // Ajustado padding
+                    ? "bottom-0 rounded-t-lg py-1 px-2 h-6"
+                    : "bottom-4 rounded-3xl px-8 py-2"
             )}
         >
             {isCollapsedForDesktop ? (
-                <div className="flex justify-center items-center h-full">
+                <div className="flex justify-center items-center h-full opacity-50 max-w-fit">
                     <Button
-                        variant="ghost"
+                        variant="default"
                         size="sm"
                         onClick={toggleCollapseForDesktop}
-                        className="p-0 h-full w-full text-inherit hover:bg-black/10 dark:hover:bg-white/10 rounded-md"
-                        aria-label="Expandir barra de navegación"
+                        className="p-0 h-6 w-full text-background  cursor-pointer"
                     >
-                        <ChevronUp className="h-5 w-5" />
+                        <ChevronUp className="h-6 w-6" />
                     </Button>
                 </div>
             ) : (
                 <div className="relative">
-                    <Button
-                        variant="ghost" // Cambiado a ghost para consistencia
-                        size="icon"
-                        onClick={toggleCollapseForDesktop}
-                        className="absolute -top-1.5 -right-1.5 h-6 w-6 text-inherit opacity-50 hover:opacity-100 hover:bg-black/20 dark:hover:bg-white/20 rounded-full p-1"
-                        aria-label="Colapsar barra de navegación"
-                    >
-                        <ChevronDown className="h-4 w-4" />
-                    </Button>
-                    <nav>
-                        <ul className="flex justify-around gap-4 sm:gap-5 items-center"> {/* Gap ajustado */}
+                    <div className="flex justify-end mb-1 absolute top-1 opacity-50 -right-8">
+                        <Button
+                            variant="link"
+                            size="sm"
+                            onClick={toggleCollapseForDesktop}
+                            className="p-0 h-6 text-background  cursor-pointer"
+                        >
+                            <ChevronDown className="h-6 w-6" />
+                        </Button>
+                    </div>
+                    <nav className="mr-2">
+                        <ul className="flex justify-around gap-6 items-center w-full">
                             {navItems.map((item) => (
-                                <NavItem key={item.to} item={item} isDesktop={true} />
+                                <NavItem key={item.to} item={item} />
                             ))}
                         </ul>
                     </nav>
