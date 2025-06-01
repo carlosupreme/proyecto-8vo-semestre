@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import {
   add,
@@ -16,18 +14,7 @@ import {
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-
-type Activity = {
-  id: number
-  name: string
-  description: string
-  startTime: string
-  endTime: string
-  date: string
-  tags: string[]
-  genre: string
-  color: string
-}
+import type { Activity } from ".."
 
 interface CalendarViewProps {
   selectedDate: Date

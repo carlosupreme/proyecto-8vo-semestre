@@ -1,5 +1,3 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
@@ -7,18 +5,8 @@ import { Plus, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ActivityCard } from "./activity-card"
 import { es } from "date-fns/locale"
+import type { Activity } from ".."
 
-type Activity = {
-  id: number
-  name: string
-  description: string
-  startTime: string
-  endTime: string
-  date: string
-  tags: string[]
-  genre: string
-  color: string
-}
 
 interface ActivityDrawerProps {
   isOpen: boolean

@@ -1,20 +1,7 @@
-"use client"
-
 import { useState } from "react"
 import { ChevronDown, ChevronUp, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-type Activity = {
-  id: number
-  name: string
-  description: string
-  startTime: string
-  endTime: string
-  date: string
-  tags: string[]
-  genre: string
-  color: string
-}
+import type { Activity } from ".."
 
 interface ActivityCardProps {
   activity: Activity
@@ -84,12 +71,12 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
   const getTextColor = (backgroundColor: string, isActive: boolean = false) => {
     // Colores más oscuros que necesitan texto claro
     const darkBackgrounds = [
-      "bg-[#899387]", "bg-[#ae8276]", "bg-[#7a8577]", "bg-[#9e7468]", 
+      "bg-[#899387]", "bg-[#ae8276]", "bg-[#7a8577]", "bg-[#9e7468]",
       "bg-[#a5a5a0]", "bg-[#9ca598]", "bg-[#959590]", "bg-[#8a9585]"
     ]
-    
+
     const currentBg = isActive ? getActiveBackgroundColor(backgroundColor) : getBackgroundColor(backgroundColor)
-    
+
     if (darkBackgrounds.some(dark => currentBg.includes(dark.slice(4, -1)))) {
       return "text-white"
     }
@@ -99,7 +86,7 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
   // Generar colores para tags adaptados al fondo
   const getTagColor = (tag: string, cardBgColor: string, isCardActive: boolean = false) => {
     const isLightText = getTextColor(cardBgColor, isCardActive) === "text-white"
-    
+
     const lightCardColors = {
       Work: "bg-white/20 text-white border border-white/30",
       Deadline: "bg-white/20 text-white border border-white/30",
@@ -148,7 +135,7 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
       >
         <div className={cn("flex flex-col p-3", isActive ? "h-auto" : "h-full")}>
           <div className={cn("min-h-0", isActive ? "" : "flex-1")}>
-            <h4 className={cn("mb-1 truncate text-sm font-semibold leading-tight", textColor)}>{activity.name}</h4>
+            <h4 className={cn("mb-1 truncate text-sm font-semibold leading-tight", textColor)}>{activity.title}</h4>
             {!isActive && (
               <div className={cn("flex items-center text-xs", mutedTextColor)}>
                 <Clock className="mr-1 h-3 w-3 flex-shrink-0" />
@@ -168,11 +155,13 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
                 </span>
               </div>
 
-              <p className={cn("text-xs leading-relaxed", textColor === "text-white" ? "text-white/90" : "text-gray-700")}>{activity.description}</p>
+              <p className={cn("text-xs leading-relaxed", textColor === "text-white" ? "text-white/90" : "text-gray-700")}>
+                {activity.title}
+              </p>
 
               <div className="text-xs">
-                <span className={cn("font-medium", mutedTextColor)}>Genre:</span>
-                <span className={cn("ml-1", textColor)}>{activity.genre}</span>
+                <span className={cn("font-medium", mutedTextColor)}></span>
+                <span className={cn("ml-1", textColor)}>{activity.client?.name}</span>
               </div>
 
               <div className="flex flex-wrap gap-1">
@@ -216,11 +205,11 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
     >
       <div className="flex cursor-pointer items-center justify-between p-4" onClick={toggleExpanded}>
         <div className="flex items-center gap-3">
-          <div className={cn("h-4 w-4 rounded-full border-2", 
+          <div className={cn("h-4 w-4 rounded-full border-2",
             textColor === "text-white" ? "border-white/40 bg-white/20" : "border-gray-400/40 bg-gray-400/20"
           )} />
           <div>
-            <h4 className={cn("font-medium", textColor)}>{activity.name}</h4>
+            <h4 className={cn("font-medium", textColor)}>{activity.title}</h4>
             <div className={cn("flex items-center text-sm", mutedTextColor)}>
               <Clock className="mr-1 h-3 w-3" />
               <span>
@@ -238,12 +227,12 @@ export function ActivityCard({ activity, isTimelineView = false, isActive = fals
       {expanded && (
         <div className="rounded-b-2xl border-t border-white/20 bg-black/5 p-4">
           <div className="mb-3">
-            <p className={cn("text-sm", textColor === "text-white" ? "text-white/90" : "text-gray-700")}>{activity.description}</p>
+            <p className={cn("text-sm", textColor === "text-white" ? "text-white/90" : "text-gray-700")}>{activity.title}</p>
           </div>
 
           <div className="mb-2">
-            <span className={cn("text-xs font-medium", mutedTextColor)}>Genre:</span>
-            <span className={cn("ml-2 text-sm", textColor)}>{activity.genre}</span>
+            <span className={cn("text-xs font-medium", mutedTextColor)}>Cliente:</span>
+            <span className={cn("ml-2 text-sm", textColor)}>{activity.client?.name}</span>
           </div>
 
           <div className="flex flex-wrap gap-2">

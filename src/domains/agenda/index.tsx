@@ -11,18 +11,19 @@ import WelcomeCard from "./components/welcome-card"
 import { useDayAppointments } from "./hooks/use-appointments"
 import type { Appointment } from "./types"
 import { minutesToTimeString } from "./types"
+import type { Client } from "../clients/types"
+import { useGetClients } from "../clients/hooks/useGetClients"
 
 // Activity type expected by UI components
-type Activity = {
+export type Activity = {
   id: number
-  name: string
-  description: string
+  title: string
   startTime: string
   endTime: string
   date: string
   tags: string[]
-  genre: string
   color: string
+  client: Client | undefined
 }
 
 export default function CalendarPage() {
@@ -59,21 +60,27 @@ export default function CalendarPage() {
 
   }
 
+  const { data: clients } = useGetClients()
+
   const isEnabled = useMemo(() => user?.assistantConfig.enabled || false, [user])
 
   // Format appointments to match the UI component requirements
-  const formattedAppointments: Activity[] = appointments.map((appointment: Appointment) => ({
-    // Convert string ID to number for UI components
-    id: +appointment.id,
-    name: appointment.title || 'Actividad',
-    description: appointment.notes,
-    startTime: minutesToTimeString(appointment.timeRange.startAt),
-    endTime: minutesToTimeString(appointment.timeRange.endAt),
-    date: appointment.date,
-    tags: appointment.tags || [],
-    genre: appointment.genre || 'Default',
-    color: appointment.color || 'bg-sky-500'
-  }))
+  const formattedAppointments: Activity[] = useMemo(() => {
+    return appointments.map((appointment: Appointment) => {
+      const client = clients?.find(client => client.id === appointment.clientId)
+
+      return {
+        id: +appointment.id,
+        title: appointment.notes,
+        startTime: minutesToTimeString(appointment.timeRange.startAt),
+        endTime: minutesToTimeString(appointment.timeRange.endAt),
+        date: appointment.date,
+        tags: appointment.tags || [],
+        color: appointment.color || 'bg-sky-500',
+        client
+      }
+    })
+  }, [appointments, clients])
 
   // Get today's date in ISO format
   const today = new Date().toISOString().split("T")[0]
@@ -234,7 +241,7 @@ export default function CalendarPage() {
                       <div key={activity.id} className="flex items-center space-x-3 p-0 bg-[#d7d4d5] rounded-2xl">
                         <div className={`w-3 h-3 rounded-full ${activity.color}`}></div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-[261f0f] truncate">{activity.name}</p>
+                          <p className="font-medium text-[261f0f] truncate">{activity.title}</p>
                           <p className="text-sm text-[261f0f]">
                             {activity.startTime} - {activity.endTime}
                           </p>
