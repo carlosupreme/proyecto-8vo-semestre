@@ -70,7 +70,7 @@ export function MessageInput({
                 <Reply className="w-4 h-4 text-gray-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-gray-600">
-                    Respondiendo a {replyTo.role === 'business' ? 'ti mismo' : 'cliente'}
+                    Respondiendo a {replyTo.role === 'business' || replyTo.role === "assistant" ? 'ti mismo' : 'cliente'}
                   </p>
                   <p className="text-xs text-gray-500 truncate">{replyTo.content}</p>
                 </div>

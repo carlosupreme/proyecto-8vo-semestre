@@ -9,6 +9,7 @@ import { CalendarView } from "./components/calendar-view";
 import { CreateActivityDialog } from "./components/create-activity-dialog";
 import WelcomeCard from "./components/welcome-card";
 import { useDayAppointments } from "./hooks/use-appointments";
+import ProfileForm from "./ProfileForm";
 import { minutesToTimeString, type Appointment } from "./types";
 
 // Ancho reducido para el drawer y margen correspondiente
@@ -83,13 +84,14 @@ export default function CalendarPage() {
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-x-hidden">
+
       {isDesktop && (
         <aside
           className={`fixed top-0 left-0 h-screen ${DESKTOP_DRAWER_WIDTH_CLASS} z-30 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-md`}
         >
           <ActivityDrawer
             isOpen={true}
-            onClose={() => {}}
+            onClose={() => { }}
             appointments={formattedAppointments}
             selectedDate={selectedDate}
             position="left"
@@ -113,14 +115,12 @@ export default function CalendarPage() {
           </div>
 
           <div
-            className={`${
-              isDesktop ? "grid grid-cols-12 gap-4" : "space-y-4" // Reducido gap y space-y
-            }`}
+            className={`${isDesktop ? "grid grid-cols-12 gap-4" : "space-y-4" // Reducido gap y space-y
+              }`}
           >
             <div
-              className={`${
-                isDesktop ? "col-span-12 lg:col-span-8 xl:col-span-9" : "w-full"
-              } space-y-4`} // Reducido space-y
+              className={`${isDesktop ? "col-span-12 lg:col-span-8 xl:col-span-9" : "w-full"
+                } space-y-4`} // Reducido space-y
             >
               {/* Summary Card - Ajustes de tamaño */}
               <div
@@ -250,6 +250,8 @@ export default function CalendarPage() {
                       <Plus className="w-5 h-5 mr-2" /> {/* Reducido icono y mr */}
                       Nuevo Evento
                     </Button>
+
+                    <ProfileForm />
                   </div>
                 </div>
 
@@ -293,6 +295,8 @@ export default function CalendarPage() {
         onClose={() => setIsCreateDialogOpen(false)}
         selectedDate={selectedDate}
       />
+
+
     </div>
   );
 }
